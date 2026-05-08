@@ -3,6 +3,25 @@
     height="auto"
     axis="column">
 
+    <brls:Box
+        width="auto"
+        height="auto"
+        justifyContent="center"
+        margin="10"
+        axis="row">
+        <brls:ProgressSpinner
+            width="30"
+            height="30"
+            id="loading_spinner"
+            margin="10"
+            size="normal"/>
+        <brls:Label
+            width="auto"
+            height="30"
+            id="loading_label"
+            margin="10"/>
+    </brls:Box>
+
     <brls:RecyclerFrame
         id="recycler"
         width="auto"

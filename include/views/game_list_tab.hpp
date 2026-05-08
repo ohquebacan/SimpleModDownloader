@@ -1,6 +1,7 @@
 #pragma once
 
 #include <borealis.hpp>
+#include <thread>
 #include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
@@ -19,6 +20,7 @@ class GameCell : public brls::RecyclerCell
 class GameData : public brls::RecyclerDataSource
 {
   public:
+    GameData() = default;
     explicit GameData(std::vector<utils::GameInfo> games);
     int numberOfSections(brls::RecyclerFrame* recycler) override;
     int numberOfRows(brls::RecyclerFrame* recycler, int section) override;
@@ -32,10 +34,14 @@ class GameData : public brls::RecyclerDataSource
 class GameListTab : public brls::Box {
 public:
     GameListTab();
+    ~GameListTab() { if (loadThread.joinable()) loadThread.join(); }
 
     static brls::View* create();
 private:
     BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
+    BRLS_BIND(brls::Label, loading_label, "loading_label");
+    BRLS_BIND(brls::ProgressSpinner, loading_spinner, "loading_spinner");
 
     GameData* gameData = nullptr;
+    std::thread loadThread;
 };
