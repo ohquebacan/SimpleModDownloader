@@ -2,7 +2,6 @@
 
 #include <borealis.hpp>
 #include <thread>
-#include <atomic>
 #include <memory>
 #include "utils/utils.hpp"
 
@@ -47,8 +46,7 @@ private:
 
     GameData* gameData = nullptr;
     std::thread loadThread;
-    std::shared_ptr<std::atomic<bool>> cancelled;
-    bool isLoading = false;
+    std::shared_ptr<bool> alive;
 
     static std::vector<utils::GameInfo> s_cachedGames;
     static bool s_cacheLoaded;
