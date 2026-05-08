@@ -85,11 +85,16 @@ GameListTab::GameListTab() {
     loading_label->setText("Loading games...");
     loading_spinner->animate(true);
 
+    isLoading = true;
+    brls::Application::blockInputs();
+
     loadThread = std::thread([this]() {
         auto games = utils::getInstalledGames();
         s_cachedGames = games;
         auto* newData = new GameData(std::move(games));
         brls::sync([this, newData]() {
+            isLoading = false;
+            brls::Application::unblockInputs();
             s_cacheLoaded = true;
             delete gameData;
             gameData = newData;
