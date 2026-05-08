@@ -4,6 +4,7 @@
 #include "views/mods_list.hpp"
 
 #include <borealis.hpp>
+#include <switch.h>
 
 using namespace brls::literals;
 
