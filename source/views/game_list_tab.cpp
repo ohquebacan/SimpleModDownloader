@@ -74,10 +74,7 @@ GameListTab::GameListTab() {
 
     loadThread = std::thread([this]() {
         auto* data = new GameData(utils::getInstalledGames());
-
-        ASYNC_RETAIN
-        brls::sync([ASYNC_TOKEN, data]() {
-            ASYNC_RELEASE
+        brls::sync([this, data]() {
             gameData = data;
             loading_spinner->animate(false);
             loading_box->setVisibility(brls::Visibility::GONE);
