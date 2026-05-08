@@ -1,6 +1,7 @@
 #include "utils/utils.hpp"
 
 #include <switch.h>
+#include <filesystem>
 #include <sstream>
 #include <iomanip>
 #include <regex>
