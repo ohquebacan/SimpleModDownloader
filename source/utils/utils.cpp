@@ -53,7 +53,7 @@ namespace utils {
         std::vector<GameInfo> games;
 
         NsApplicationRecord* records = new NsApplicationRecord[64000]();
-        NsApplicationControlData controlData;
+        NsApplicationControlData* controlData = new NsApplicationControlData();
         NacpLanguageEntry* langEntry = nullptr;
 
         Result rc;
@@ -63,15 +63,15 @@ namespace utils {
         rc = nsListApplicationRecord(records, 64000, 0, &recordCount);
         for (auto i = 0; i < recordCount; ++i) {
             uint64_t tid = records[i].application_id;
-            rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, &controlData, sizeof(controlData), &controlSize);
+            rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, controlData, sizeof(*controlData), &controlSize);
             if (R_FAILED(rc))
                 continue;
 
             // Skip system apps, media apps and NRO forwarders — games always require a user account
-            if (controlData.nacp.startup_user_account == 0)
+            if (controlData->nacp.startup_user_account == 0)
                 continue;
 
-            rc = nacpGetLanguageEntrySpecialLanguage(&controlData.nacp, &langEntry, SetLanguage_ENUS);
+            rc = nacpGetLanguageEntrySpecialLanguage(&controlData->nacp, &langEntry, SetLanguage_ENUS);
             if (R_FAILED(rc))
                 continue;
 
@@ -81,11 +81,12 @@ namespace utils {
             GameInfo info;
             info.name = langEntry->name;
             info.tid = formatApplicationId(tid);
-            info.icon.assign(controlData.icon, controlData.icon + 0x20000);
+            info.icon.assign(controlData->icon, controlData->icon + 0x20000);
             games.push_back(std::move(info));
         }
 
         delete[] records;
+        delete controlData;
         return games;
     }
 
