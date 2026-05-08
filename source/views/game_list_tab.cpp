@@ -80,8 +80,8 @@ GameListTab::GameListTab() {
             delete gameData;
             gameData = newData;
             recycler->setDataSource(gameData, false);
-            loading_label->setText("");
             loading_spinner->animate(false);
+            loading_box->setVisibility(brls::Visibility::GONE);
         });
     });
 

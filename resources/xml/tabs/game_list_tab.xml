@@ -4,6 +4,7 @@
     axis="column">
 
     <brls:Box
+        id="loading_box"
         width="auto"
         height="auto"
         justifyContent="center"

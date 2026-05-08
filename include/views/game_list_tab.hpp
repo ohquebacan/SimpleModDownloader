@@ -39,6 +39,7 @@ public:
     static brls::View* create();
 private:
     BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
+    BRLS_BIND(brls::Box, loading_box, "loading_box");
     BRLS_BIND(brls::Label, loading_label, "loading_label");
     BRLS_BIND(brls::ProgressSpinner, loading_spinner, "loading_spinner");
 
