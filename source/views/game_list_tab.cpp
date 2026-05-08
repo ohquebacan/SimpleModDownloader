@@ -66,13 +66,6 @@ std::string GameData::titleForHeader(brls::RecyclerFrame* recycler, int section)
     return "";
 }
 
-GameListTab::~GameListTab() {
-    if (alive)
-        *alive = false;
-    if (loadThread.joinable())
-        loadThread.detach();
-}
-
 GameListTab::GameListTab() {
     this->inflateFromXMLRes("xml/tabs/game_list_tab.xml");
 
@@ -92,18 +85,11 @@ GameListTab::GameListTab() {
     loading_label->setText("Loading games...");
     loading_spinner->animate(true);
 
-    alive = std::make_shared<bool>(true);
-    auto a = alive;
-    loadThread = std::thread([this, a]() {
+    loadThread = std::thread([this]() {
         auto games = utils::getInstalledGames();
-        // Save to cache before moving into GameData
         s_cachedGames = games;
         auto* newData = new GameData(std::move(games));
-        brls::sync([this, newData, a]() {
-            if (!*a) {
-                delete newData;
-                return;
-            }
+        brls::sync([this, newData]() {
             s_cacheLoaded = true;
             delete gameData;
             gameData = newData;
