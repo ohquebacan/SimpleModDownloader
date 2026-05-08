@@ -2,6 +2,8 @@
 
 #include <borealis.hpp>
 #include <thread>
+#include <atomic>
+#include <memory>
 #include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
@@ -34,7 +36,7 @@ class GameData : public brls::RecyclerDataSource
 class GameListTab : public brls::Box {
 public:
     GameListTab();
-    ~GameListTab() { if (loadThread.joinable()) loadThread.join(); }
+    ~GameListTab();
 
     static brls::View* create();
 private:
@@ -45,4 +47,9 @@ private:
 
     GameData* gameData = nullptr;
     std::thread loadThread;
+    std::shared_ptr<std::atomic<bool>> cancelled;
+    bool isLoading = false;
+
+    static std::vector<utils::GameInfo> s_cachedGames;
+    static bool s_cacheLoaded;
 };

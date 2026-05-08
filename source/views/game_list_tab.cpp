@@ -7,6 +7,9 @@
 
 using namespace brls::literals;
 
+std::vector<utils::GameInfo> GameListTab::s_cachedGames;
+bool GameListTab::s_cacheLoaded = false;
+
 GameCell::GameCell()
 {
     this->inflateFromXMLRes("xml/cells/cell.xml");
@@ -63,27 +66,52 @@ std::string GameData::titleForHeader(brls::RecyclerFrame* recycler, int section)
     return "";
 }
 
+GameListTab::~GameListTab() {
+    if (isLoading) {
+        cancelled->store(true);
+        brls::Application::unblockInputs();
+    }
+}
+
 GameListTab::GameListTab() {
     this->inflateFromXMLRes("xml/tabs/game_list_tab.xml");
 
-    gameData = new GameData();
     recycler->estimatedRowHeight = 100;
     recycler->registerCell("Cell", []() { return GameCell::create(); });
-    recycler->setDataSource(gameData, false);
 
+    if (s_cacheLoaded) {
+        gameData = new GameData(s_cachedGames);
+        recycler->setDataSource(gameData, false);
+        loading_box->setVisibility(brls::Visibility::GONE);
+        return;
+    }
+
+    gameData = new GameData();
+    recycler->setDataSource(gameData, false);
     loading_label->setText("Loading games...");
     loading_spinner->animate(true);
 
-    loadThread = std::thread([this]() {
-        auto* newData = new GameData(utils::getInstalledGames());
-        brls::sync([this, newData]() {
+    isLoading = true;
+    cancelled = std::make_shared<std::atomic<bool>>(false);
+    brls::Application::blockInputs();
+
+    auto c = cancelled;
+    loadThread = std::thread([this, c]() {
+        auto games = utils::getInstalledGames();
+        brls::sync([this, games = std::move(games), c]() mutable {
+            if (c->load()) return;
+            brls::Application::unblockInputs();
+            isLoading = false;
+            s_cachedGames = games;
+            s_cacheLoaded = true;
             delete gameData;
-            gameData = newData;
+            gameData = new GameData(std::move(games));
             recycler->setDataSource(gameData, false);
             loading_spinner->animate(false);
             loading_box->setVisibility(brls::Visibility::GONE);
         });
     });
+    loadThread.detach();
 
     #ifndef NDEBUG
     cfg::Config config;
