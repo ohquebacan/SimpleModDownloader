@@ -67,10 +67,8 @@ std::string GameData::titleForHeader(brls::RecyclerFrame* recycler, int section)
 }
 
 GameListTab::~GameListTab() {
-    if (isLoading) {
+    if (isLoading)
         cancelled->store(true);
-        brls::Application::unblockInputs();
-    }
 }
 
 GameListTab::GameListTab() {
@@ -93,14 +91,12 @@ GameListTab::GameListTab() {
 
     isLoading = true;
     cancelled = std::make_shared<std::atomic<bool>>(false);
-    brls::Application::blockInputs();
 
     auto c = cancelled;
     loadThread = std::thread([this, c]() {
         auto games = utils::getInstalledGames();
         brls::sync([this, games = std::move(games), c]() mutable {
             if (c->load()) return;
-            brls::Application::unblockInputs();
             isLoading = false;
             s_cachedGames = games;
             s_cacheLoaded = true;
