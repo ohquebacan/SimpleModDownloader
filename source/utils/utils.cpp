@@ -62,6 +62,7 @@ namespace utils {
 
         rc = nsListApplicationRecord(records, 64000, 0, &recordCount);
         for (auto i = 0; i < recordCount; ++i) {
+            svcSleepThread(1000000LL); // 1ms yield per game — keeps UI thread responsive
             uint64_t tid = records[i].application_id;
             rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, controlData, sizeof(*controlData), &controlSize);
             if (R_FAILED(rc))
