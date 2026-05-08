@@ -3,25 +3,6 @@
     height="auto"
     axis="column">
 
-    <brls:Box
-        id="loading_box"
-        width="auto"
-        height="auto"
-        grow="1.0"
-        axis="column"
-        justifyContent="center"
-        alignItems="center">
-        <brls:ProgressSpinner
-            id="loading_spinner"
-            width="64"
-            height="64"/>
-        <brls:Label
-            width="auto"
-            height="auto"
-            marginTop="16"
-            text="Loading games..."/>
-    </brls:Box>
-
     <brls:RecyclerFrame
         id="recycler"
         width="auto"

@@ -69,16 +69,10 @@ GameListTab::GameListTab() {
     recycler->estimatedRowHeight = 100;
     recycler->registerCell("Cell", []() { return GameCell::create(); });
 
-    recycler->setVisibility(brls::Visibility::GONE);
-    loading_spinner->animate(true);
-
     loadThread = std::thread([this]() {
         auto* data = new GameData(utils::getInstalledGames());
         brls::sync([this, data]() {
             gameData = data;
-            loading_spinner->animate(false);
-            loading_box->setVisibility(brls::Visibility::GONE);
-            recycler->setVisibility(brls::Visibility::VISIBLE);
             recycler->setDataSource(gameData, false);
         });
     });
