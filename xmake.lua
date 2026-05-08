@@ -27,8 +27,8 @@ target("SimpleModDownloader")
     set_languages("c++17")
     
     set_values("switch.name", "SimpleModDownloader")
-    set_values("switch.author", "PoloNX")
-    set_values("switch.version", "2.3.0")
+    set_values("switch.author", "OHQUEBACAN")
+    set_values("switch.version", "2.4.0")
     set_values("switch.romfs", "resources")
     set_values("switch.icon", "resources/icon/icon-256.jpg")
 
