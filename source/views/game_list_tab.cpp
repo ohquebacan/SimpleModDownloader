@@ -66,16 +66,11 @@ std::string GameData::titleForHeader(brls::RecyclerFrame* recycler, int section)
 GameListTab::GameListTab() {
     this->inflateFromXMLRes("xml/tabs/game_list_tab.xml");
 
+    gameData = new GameData(utils::getInstalledGames());
+
     recycler->estimatedRowHeight = 100;
     recycler->registerCell("Cell", []() { return GameCell::create(); });
-
-    loadThread = std::thread([this]() {
-        auto* data = new GameData(utils::getInstalledGames());
-        brls::sync([this, data]() {
-            gameData = data;
-            recycler->setDataSource(gameData, false);
-        });
-    });
+    recycler->setDataSource(gameData, false);
 
     #ifndef NDEBUG
     cfg::Config config;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <borealis.hpp>
-#include <thread>
 #include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
@@ -33,12 +32,10 @@ class GameData : public brls::RecyclerDataSource
 class GameListTab : public brls::Box {
 public:
     GameListTab();
-    ~GameListTab() { if (loadThread.joinable()) loadThread.join(); }
 
     static brls::View* create();
 private:
     BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
 
     GameData* gameData = nullptr;
-    std::thread loadThread;
 };
