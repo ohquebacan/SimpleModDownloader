@@ -4,7 +4,6 @@
 #include "views/mods_list.hpp"
 
 #include <borealis.hpp>
-#include <switch.h>
 
 using namespace brls::literals;
 
@@ -76,10 +75,6 @@ GameListTab::GameListTab() {
     loading_spinner->animate(true);
 
     loadThread = std::thread([this]() {
-        // Run at lower priority than the UI thread so rendering stays smooth.
-        // 0xFFFF8000 is the Horizon OS pseudo-handle for the current thread.
-        // Priority 0x3C (60) is well below the default homebrew priority (~0x2C).
-        svcSetThreadPriority(0xFFFF8000, 0x3C);
         auto* newData = new GameData(utils::getInstalledGames());
         brls::sync([this, newData]() {
             delete gameData;
