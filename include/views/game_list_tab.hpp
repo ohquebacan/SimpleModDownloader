@@ -1,6 +1,8 @@
 #pragma once
 
 #include <borealis.hpp>
+#include <thread>
+#include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
 {
@@ -15,28 +17,30 @@ class GameCell : public brls::RecyclerCell
     static GameCell* create();
 };
 
-class GameData
-    : public brls::RecyclerDataSource
+class GameData : public brls::RecyclerDataSource
 {
   public:
-    GameData();
+    explicit GameData(std::vector<utils::GameInfo> games);
     int numberOfSections(brls::RecyclerFrame* recycler) override;
     int numberOfRows(brls::RecyclerFrame* recycler, int section) override;
     brls::RecyclerCell* cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath index) override;
     void didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath) override;
     std::string titleForHeader(brls::RecyclerFrame* recycler, int section) override;
   private:
-    std::vector<std::pair<std::string, std::string>> games;
+    std::vector<utils::GameInfo> games;
 };
 
 class GameListTab : public brls::Box {
 public:
     GameListTab();
+    ~GameListTab() { if (loadThread.joinable()) loadThread.join(); }
 
     static brls::View* create();
 private:
     BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
+    BRLS_BIND(brls::Box, loading_box, "loading_box");
+    BRLS_BIND(brls::ProgressSpinner, loading_spinner, "loading_spinner");
 
-    
-    GameData* gameData;
+    GameData* gameData = nullptr;
+    std::thread loadThread;
 };

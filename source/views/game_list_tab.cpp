@@ -20,17 +20,17 @@ GameCell* GameCell::create()
 brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
 {
     auto cell = (GameCell*)recycler->dequeueReusableCell("Cell");
-    cell->label->setText(games[indexPath.row].first);
-    cell->subtitle->setText(fmt::format("TitleID : {}",games[indexPath.row].second));
-    uint8_t* icon = utils::getIconFromTitleId(games[indexPath.row].second);
-    if(icon != nullptr)
-        cell->image->setImageFromMem(icon, 0x20000);
+    const auto& game = games[indexPath.row];
+    cell->label->setText(game.name);
+    cell->subtitle->setText(fmt::format("TitleID : {}", game.tid));
+    if (!game.icon.empty())
+        cell->image->setImageFromMem(game.icon.data(), game.icon.size());
     return cell;
 }
 
 void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
-{ 
-    Game game(games[indexPath.row].first, games[indexPath.row].second);
+{
+    Game game(games[indexPath.row].name, games[indexPath.row].tid);
     if(game.getGamebananaID() == 0) {
         auto dialog = new brls::Dialog("menu/notify/no_games_gamebanana"_i18n);
         dialog->addButton("hints/ok"_i18n, []() {});
@@ -44,11 +44,10 @@ void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath ind
         return;
     }
     auto modListTab = new ModListTab(game);
-    recycler->present(modListTab);    
+    recycler->present(modListTab);
 }
 
-GameData::GameData() {
-    games = utils::getInstalledGames();
+GameData::GameData(std::vector<utils::GameInfo> g) : games(std::move(g)) {
     brls::Logger::debug("{} games found", games.size());
 }
 
@@ -67,12 +66,25 @@ std::string GameData::titleForHeader(brls::RecyclerFrame* recycler, int section)
 GameListTab::GameListTab() {
     this->inflateFromXMLRes("xml/tabs/game_list_tab.xml");
 
-    gameData = new GameData();
-
-
     recycler->estimatedRowHeight = 100;
-    recycler->registerCell("Cell", []() { return GameCell::create();});
-    recycler->setDataSource(gameData, false);
+    recycler->registerCell("Cell", []() { return GameCell::create(); });
+
+    recycler->setVisibility(brls::Visibility::GONE);
+    loading_spinner->animate(true);
+
+    loadThread = std::thread([this]() {
+        auto* data = new GameData(utils::getInstalledGames());
+
+        ASYNC_RETAIN
+        brls::sync([ASYNC_TOKEN, data]() {
+            ASYNC_RELEASE
+            gameData = data;
+            loading_spinner->animate(false);
+            loading_box->setVisibility(brls::Visibility::GONE);
+            recycler->setVisibility(brls::Visibility::VISIBLE);
+            recycler->setDataSource(gameData, false);
+        });
+    });
 
     #ifndef NDEBUG
     cfg::Config config;

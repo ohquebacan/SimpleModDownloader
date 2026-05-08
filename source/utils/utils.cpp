@@ -1,7 +1,6 @@
 #include "utils/utils.hpp"
 
 #include <switch.h>
-#include <nlohmann/json.hpp>
 #include <sstream>
 #include <iomanip>
 #include <regex>
@@ -49,73 +48,44 @@ namespace utils {
         return strm.str();
     }
 
-    std::vector<std::pair<std::string, std::string>> getInstalledGames() {
-        std::vector<std::pair<std::string, std::string>> games;
+    std::vector<GameInfo> getInstalledGames() {
+        std::vector<GameInfo> games;
 
         NsApplicationRecord* records = new NsApplicationRecord[64000]();
-        uint64_t tid;
         NsApplicationControlData controlData;
         NacpLanguageEntry* langEntry = nullptr;
-        const char* desiredLanguageCode = "en";
-        
+
         Result rc;
         int recordCount = 0;
         size_t controlSize = 0;
 
-        nlohmann::json json = nlohmann::json::array();
-
         rc = nsListApplicationRecord(records, 64000, 0, &recordCount);
         for (auto i = 0; i < recordCount; ++i) {
-            tid = records[i].application_id;
+            uint64_t tid = records[i].application_id;
             rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, &controlData, sizeof(controlData), &controlSize);
-            if (R_FAILED(rc)) {
-                continue; // Ou break je sais pas trop
-            }
+            if (R_FAILED(rc))
+                continue;
+
+            // Skip system apps, media apps and NRO forwarders — games always require a user account
+            if (controlData.nacp.startup_user_account == 0)
+                continue;
 
             rc = nacpGetLanguageEntrySpecialLanguage(&controlData.nacp, &langEntry, SetLanguage_ENUS);
-            
-            //rc = nsGetApplicationDesiredLanguage(&controlData.nacp, &langEntry);    
-            if (R_FAILED(rc)) {
-                continue; // Ou break je sais pas trop
-            }
-
-            if (!langEntry->name) {
+            if (R_FAILED(rc))
                 continue;
-            }
 
-            std::string appName = langEntry->name;
-            std::string titleId = formatApplicationId(tid);
-            json.push_back({
-                {"name", appName},
-                {"tid", titleId}
-            });
+            if (!langEntry->name)
+                continue;
+
+            GameInfo info;
+            info.name = langEntry->name;
+            info.tid = formatApplicationId(tid);
+            info.icon.assign(controlData.icon, controlData.icon + 0x20000);
+            games.push_back(std::move(info));
         }
 
         delete[] records;
-
-        for(auto i : json) {
-            games.push_back(std::pair<std::string, std::string>(i.at("name").get<std::string>(), i.at("tid").get<std::string>()));
-        }
-
         return games;
-    }
-
-    uint8_t* getIconFromTitleId(const std::string& titleId) {
-        if(titleId.empty()) return nullptr;
-
-        uint8_t* icon = nullptr;
-        NsApplicationControlData controlData;
-        size_t controlSize  = 0;
-        uint64_t tid;
-
-        std::istringstream buffer(titleId);
-        buffer >> std::hex >> tid;
-
-        if (R_FAILED(nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, &controlData, sizeof(controlData), &controlSize))){ return nullptr; }
-
-        icon = new uint8_t[0x20000];
-        memcpy(icon, controlData.icon, 0x20000);
-        return icon;
     }
 
     std::string removeHtmlTags(const std::string& input) {
