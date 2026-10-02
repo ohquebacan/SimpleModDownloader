@@ -36,4 +36,6 @@ private:
 
     bool downloadFinished = false;
     bool extractFinished = false;
+    /* OQB: el archivo descargado no traia contenido instalable. */
+    bool notSupported = false;
 };

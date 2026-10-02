@@ -19,6 +19,9 @@ class File {
         Game getGame() { return game; }
         std::string getModName() { return modName; }
         bool getRomfs() { return romfs; }
+        /* OQB: true cuando la API de GameBanana no contesto y por tanto NO
+         * sabemos si el mod trae romfs. No es lo mismo que "no compatible". */
+        bool getCheckFailed() { return checkFailed; }
 
     private:
         bool findRomfsRecursive(const nlohmann::json& obj);
@@ -33,6 +36,7 @@ class File {
         std::string modName;
         std::string fileID;
         bool romfs = false;
+        bool checkFailed = false;
 };
 
 class Mod {

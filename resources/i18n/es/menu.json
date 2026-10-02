@@ -17,7 +17,8 @@
     
     "notify" : {
         "no_games_gamebanana" : "No se encontraron juegos en la base de datos de GameBanana",
-        "not_supported": "Este formato no es compatible: "
+        "not_supported": "Este formato no es compatible: ",
+        "mod_unsupported": "El mod no es compatible con SimpleModDownloader"
     },
     
     "worker": {

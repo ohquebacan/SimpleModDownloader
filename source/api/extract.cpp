@@ -51,6 +51,46 @@ namespace extract {
         return totalSize;
     }
 
+    bool hasSupportedContents(const std::string& archivePath, const std::string& tid) {
+        /* Los mods de Smash van tal cual a sdmc:/ultimate/mods, no se filtran. */
+        if (tid == smash_tid)
+            return true;
+
+        struct archive* archive = archive_read_new();
+        struct archive_entry* entry;
+
+        archive_read_support_format_all(archive);
+        archive_read_support_filter_all(archive);
+
+        if (archive_read_open_filename(archive, archivePath.c_str(), 10240) != ARCHIVE_OK) {
+            /* No podemos abrirlo: que lo reporte extractEntry con su propio
+             * mensaje en vez de decir aqui que el mod no es compatible. */
+            brls::Logger::error("No se pudo abrir {} para comprobar su contenido", archivePath);
+            archive_read_free(archive);
+            return true;
+        }
+
+        bool supported = false;
+        while (archive_read_next_header(archive, &entry) == ARCHIVE_OK) {
+            const std::string name = archive_entry_pathname(entry);
+            if (name.find("romfs/") != std::string::npos ||
+                name.find("exefs/") != std::string::npos ||
+                name.find("exefs_patches/") != std::string::npos) {
+                brls::Logger::debug("Contenido instalable encontrado: {}", name);
+                supported = true;
+                break;
+            }
+        }
+
+        archive_read_close(archive);
+        archive_read_free(archive);
+
+        if (!supported)
+            brls::Logger::error("{} no trae romfs/, exefs/ ni exefs_patches/", archivePath);
+
+        return supported;
+    }
+
 bool extractEntry(const std::string& archiveFile, const std::string& outputDir, const std::string& tid) {
         chdir("sdmc:/");
         struct archive* archive = archive_read_new();

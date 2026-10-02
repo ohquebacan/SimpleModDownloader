@@ -66,20 +66,34 @@ void ModPreview::loadButtons() {
         fileBox->getDownloadButton()->registerClickAction(brls::ActionListener([file = std::move(file), this](brls::View* view) mutable {
             brls::Logger::debug("File clicked : {}", file.getName());
             file.loadFile();
-            //Smash tid
-            if(file.getRomfs() || file.getGame().getTid() == "01006A800016E000") {  
+
+            auto startDownload = [this, file]() mutable {
                 brls::sync([this] {
                     getAppletFrame()->setHeaderVisibility(brls::Visibility::VISIBLE);
                 });
                 ProgressEvent::instance().setInterupt(true);
                 this->present(new DownloadView(file));
                 this->stopThreadFlag = true;
-            }  
+            };
+
+            //Smash tid
+            if(file.getRomfs() || file.getGame().getTid() == "01006A800016E000") {
+                startDownload();
+            }
+            else if(file.getCheckFailed()) {
+                /* OQB: la API de GameBanana no contesto, asi que no pudimos
+                 * comprobarlo ANTES de descargar. Descargamos y DownloadView lo
+                 * verifica sobre el archivo real con extract::hasSupportedContents.
+                 * Antes esto caia en el mensaje de "no compatible" y bloqueaba
+                 * toda descarga cuando su API fallaba. */
+                brls::Logger::debug("La API no contesto; se verificara el archivo tras descargarlo");
+                startDownload();
+            }
             else {
                 auto dialog = new brls::Dialog("menu/notify/mod_unsupported"_i18n);
                 dialog->addButton("hints/ok"_i18n, []() {});
                 dialog->open();
-            } 
+            }
             return true;
         }));
         files_box->addView(fileBox);

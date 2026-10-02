@@ -103,6 +103,17 @@ bool File::findRomfsRecursive(const nlohmann::json& obj) {
 
 void File::loadFile() {
     auto json = net::downloadRequest(fmt::format("https://gamebanana.com/apiv11/File/{}", fileID));
+
+    /* OQB: si la peticion no devolvio nada utilizable (endpoint caido, respuesta
+     * que no es JSON, sin conexion) no podemos saber si el mod trae romfs.
+     * Antes esto acababa en el mismo sitio que "mod no compatible" y bloqueaba
+     * TODA descarga; ahora se distingue. */
+    if (json.is_null() || json.empty()) {
+        brls::Logger::error("No se pudo consultar el contenido del archivo {}", fileID);
+        checkFailed = true;
+        return;
+    }
+
     nlohmann::json archiveFileTree = json;
     // Check if the correct json object is present. 
     if (json.contains("_aArchiveFileTree") && json["_aArchiveFileTree"].is_object()) {

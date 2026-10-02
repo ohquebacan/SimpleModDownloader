@@ -6,6 +6,7 @@
 #include "utils/config.hpp"
 
 #include <regex>
+#include <filesystem>
 
 using namespace brls::literals;
 
@@ -65,6 +66,16 @@ void DownloadView::downloadFile() {
     this->downloadFinished = true;
 
     ProgressEvent::instance().reset();
+
+    /* OQB: comprobamos el archivo real en vez de fiarnos del listado de
+     * GameBanana. Si no trae contenido instalable lo decimos y lo borramos, en
+     * lugar de "extraer" cero ficheros y dar la instalacion por buena. */
+    if (!extract::hasSupportedContents(this->file.getPath(), this->file.getGame().getTid())) {
+        this->notSupported = true;
+        std::filesystem::remove(this->file.getPath());
+        this->extractFinished = true;
+        return;
+    }
 
     //Prevent incorrect chars in the path
     std::regex badChars("[:/\\<>|*]");
@@ -133,9 +144,16 @@ void DownloadView::updateProgress() {
     ASYNC_RETAIN
     brls::sync([ASYNC_TOKEN]() {
         ASYNC_RELEASE
+        /* OQB: leemos la bandera antes del dismiss(), que puede destruir la vista. */
+        const bool unsupported = this->notSupported;
         getAppletFrame()->setHeaderVisibility(brls::Visibility::GONE);
         getAppletFrame()->setActionAvailable(brls::ControllerButton::BUTTON_B, true);
         this->dismiss();
+        if (unsupported) {
+            auto dialog = new brls::Dialog("menu/notify/mod_unsupported"_i18n);
+            dialog->addButton("hints/ok"_i18n, []() {});
+            dialog->open();
+        }
         /*auto button = new brls::Button();
         button->setText("hints/back"_i18n);
         button->setFocusable(true);
