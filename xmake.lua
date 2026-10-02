@@ -28,7 +28,7 @@ target("SimpleModDownloader")
     
     set_values("switch.name", "SimpleModDownloader")
     set_values("switch.author", "OHQUEBACAN")
-    set_values("switch.version", "2.4.0")
+    set_values("switch.version", "3.0.0")
     set_values("switch.romfs", "resources")
     set_values("switch.icon", "resources/icon/icon-256.jpg")
 
@@ -40,3 +40,8 @@ target("SimpleModDownloader")
     add_files("source/**.cpp")
     add_includedirs("include")
     add_packages("borealis", "deko3d", "libcurl", "libarchive", "bzip2", "zlib", "liblzma", "lz4", "libexpat", "libzstd")
+
+    -- OQB: en modo release los paquetes ponen -lnx ANTES de -ldrm_nouveau, y
+    -- libdrm_nouveau.a necesita nvMapInit/nvGpu* de libnx. Con libs estaticas el
+    -- orden manda, asi que repetimos libnx al final (los syslinks van ultimos).
+    add_syslinks("nx")
