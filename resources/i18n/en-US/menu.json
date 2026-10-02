@@ -2,14 +2,12 @@
     "main": {
         "app_name": "SimpleModDownloader"
     },
-
     "title": {
         "downloading_smm": "Downloading SimpleModManager",
         "downloading_smd": "Downloading SimpleModDownloader",
         "downloading": "Downloading",
         "extracting": "Extracting"
     },
-    
     "tabs": {
         "downloads": "Downloads",
         "install": "Installation",
@@ -17,7 +15,6 @@
         "about": "About",
         "settings": "Settings"
     },
-    
     "notify": {
         "no_games_gamebanana": "No games found in the GameBanana database",
         "not_supported": "This format is not supported: ",
@@ -26,44 +23,39 @@
         "smash_bros": "Super Smash Bros. Ultimate use ARCropolis mod manager. SimpleModDownloader support it, don't use SimpleModManager to install the mod",
         "request_error": "An error occurred while requesting the mod list. Please check your internet connection and try again. If the problem persists change in settings the strict search option."
     },
-    
     "worker": {
         "of": "of",
         "cancel": "Cancel",
         "install": "Installing",
         "remaining": "Time remaining"
     },
-    
     "about": {
         "title": "About SimpleModDownloader",
         "description": "SimpleModDownloader is an application that allows you to download and install mods for Nintendo Switch games created by PoloNX.",
-        "thanks": "\u25c6 Thanks to @nadrino for SimpleModManager\n\u25c6 Thanks to Natinusala, xfangfang and XITRIX for borealis\n\u25c6 Thanks to Pikatsuto for the logo and SuperButterScotch for the typography\n\u25c6 Thanks to NicholeMattera for Simple-INI-Parser",
-        "translator": "\u25c6 Thanks to traductors",
+        "thanks": "◆ OQB version by OH! QUÉ BACÁN\n◆ Thanks to @nadrino for SimpleModManager\n◆ Thanks to Natinusala, xfangfang and XITRIX for borealis\n◆ Thanks to Pikatsuto for the logo and SuperButterScotch for the typography\n◆ Thanks to NicholeMattera for Simple-INI-Parser",
+        "translator": "◆ Thanks to traductors",
         "_MESSAGE_TO_TRANSLATORS": "Put your name in about/translator please"
     },
-    
     "label": {
         "no_games": "No games found on the Switch",
         "install": "Installation",
         "desc_install": "To install mods, you need to use the SimpleModManager application created by @nadrino.",
         "extract": "Extraction is complete. To install the mod, go to the Installation tab.",
         "update": "Update App",
-        "new_update": "\u25c6 Current version :",
-        "available_version" : "\u25c6 Available version :",
+        "new_update": "◆ Current version :",
+        "available_version": "◆ Available version :",
         "restart_smd": "Restart SimpleModDownloader to apply the update.",
         "no_internet": "No internet connection.",
-        "desc_smd": "\u25c6 You can update the app you're using on your switch",
+        "desc_smd": "◆ You can update the app you're using on your switch",
         "path": "Path",
         "url": "Url"
     },
-    
     "item": {
         "launch_smm": "Launch SimpleModManager",
         "download_smm": "Download SimpleModManager",
         "download_smd": "Download SimpleModDownloader",
         "check_update": "Check for updates"
     },
-    
     "mods": {
         "mods_list_title": "Mod List",
         "search": "Search",
@@ -72,7 +64,7 @@
         "links": "Download Link(s)",
         "size": "Size",
         "date": "Date",
-        "screenshots" : "Screenshots",
+        "screenshots": "Screenshots",
         "description": "Description",
         "browser": "Open in Browser",
         "author": "Author",
@@ -83,14 +75,12 @@
         "files": "Files",
         "categories": "Categories"
     },
-
-    "settings_tab" : {
-        "language" : "Select language",
-        "debug" : "Debug layer",
+    "settings_tab": {
+        "language": "Select language",
+        "debug": "Debug layer",
         "strict": "Strict search when looking up games (no false positives)"
     },
-
-    "crash" : {
-        "sd_full" : "The SD card is full. Please free up space and restart the application."
+    "crash": {
+        "sd_full": "The SD card is full. Please free up space and restart the application."
     }
 }

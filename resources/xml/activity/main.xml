@@ -46,7 +46,7 @@
                     <brls:Image
                         width="auto"
                         height="33%"
-                        image="@res/icon/icon.png"
+                        image="@res/icon/about.jpg"
                         cornerRadius="15"
                         marginTop="@style/about/description_margin"
                         marginBottom="@style/about/description_margin"/>
