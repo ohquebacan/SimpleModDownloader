@@ -4,10 +4,19 @@
 #include <curl/curl.h>
 #include <borealis.hpp>
 #include <fstream>
+#include <mutex>
 
 namespace net {
     std::chrono::_V2::steady_clock::time_point time_old;
     double dlold;
+
+    /* OQB: el libcurl de devkitPro (7.69.1) va enlazado contra un mbedTLS
+     * compilado SIN MBEDTLS_THREADING_C, asi que no es thread-safe. Al pulsar
+     * descargar, loadFile() corre en el hilo de la UI mientras loadImages()
+     * sigue bajando capturas en secondThread: dos curl_easy_perform() a la vez
+     * corrompen memoria y la app se cierra (o crashea con PC=0 dentro del
+     * vector del callback de imagenes). Serializamos todo el acceso a la red. */
+    static std::mutex curlMutex;
 
     size_t WriteCallback(void* content, size_t size, size_t nmemb, std::string* buffer) {
         buffer->append((char*)content, size * nmemb);
@@ -15,6 +24,7 @@ namespace net {
     }
 
     nlohmann::json downloadRequest(std::string url) {
+        std::lock_guard<std::mutex> lock(curlMutex);
         auto curl = curl_easy_init();
 
         brls::Logger::debug("Requesting: " + url);
@@ -41,7 +51,14 @@ namespace net {
         if(res != CURLE_OK) {
             brls::Logger::error("Failed to perform request: " + std::string(curl_easy_strerror(res)));
         } else {
-            json = nlohmann::json::parse(response);
+            /* OQB: si la respuesta no es JSON valido (error HTML, 406, corte de
+             * conexion) parse() lanza y la excepcion sube por un hilo sin
+             * try/catch -> std::terminate. Devolvemos un json vacio. */
+            try {
+                json = nlohmann::json::parse(response);
+            } catch (const std::exception& e) {
+                brls::Logger::error("Failed to parse JSON from {}: {}", url, e.what());
+            }
         }
 
         curl_easy_cleanup(curl);
@@ -60,6 +77,7 @@ namespace net {
     }
 
     void downloadImage(const std::string& url, std::vector<unsigned char>& buffer) {
+        std::lock_guard<std::mutex> lock(curlMutex);
         auto curl = curl_easy_init();
 
         brls::Logger::debug("Downloading image: {}", url);
@@ -110,6 +128,7 @@ namespace net {
     void downloadFile(const std::string& url, const std::string& path) {
         brls::Logger::debug("Downloading file: {}, in the location : {}", url, path);
 
+        std::lock_guard<std::mutex> lock(curlMutex);
         auto curl = curl_easy_init();
 
         if(!curl) {
@@ -131,18 +150,13 @@ namespace net {
 
         auto res = curl_easy_perform(curl);
 
-        if(res != CURLE_OK) {
-            brls::Logger::error(curl_easy_strerror(res));
-            return; 
-        }
-
         ofs.close();
 
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK) {
             brls::Logger::error(curl_easy_strerror(res));
-            std::filesystem::remove(path); 
+            std::filesystem::remove(path);
         }
     }
 
