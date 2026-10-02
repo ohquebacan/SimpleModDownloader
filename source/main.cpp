@@ -23,7 +23,12 @@ int main(int argc, char* argv[]) {
     #ifdef NDEBUG //release
         // Using FILE* because brls::Logger::setLogOutput only takes FILE*, not std::ofstream
         FILE* logFile = fopen("sdmc:/config/SimpleModDownloader/log.log", "w");
-        brls::Logger::setLogOutput(logFile);
+        if (logFile) {
+            /* OQB: sin buffer, para que un cierre inesperado no se lleve las
+             * ultimas lineas del log. Es lo que permitio localizar el crash. */
+            setvbuf(logFile, nullptr, _IONBF, 0);
+            brls::Logger::setLogOutput(logFile);
+        }
     #endif
 
 
