@@ -10,12 +10,15 @@
     "tabs": {
         "downloads": "Descargas",
         "install": "Instalación",
-        "about": "Acerca de"
+        "about": "Acerca de",
+        "settings": "Ajustes"
     },
     "notify": {
         "no_games_gamebanana": "No se encontraron juegos en la base de datos de GameBanana",
         "not_supported": "Este formato no es compatible: ",
-        "mod_unsupported": "El mod no es compatible con SimpleModDownloader"
+        "mod_unsupported": "El mod no es compatible con SimpleModDownloader",
+        "request_error": "No se pudo conectar con GameBanana. Revisa la conexión e inténtalo de nuevo.",
+        "string_to_short": "Escribe al menos 3 letras para buscar."
     },
     "worker": {
         "of": "de",
@@ -49,7 +52,14 @@
         "date": "Fecha",
         "images": "Ver imágenes",
         "browser": "Abrir en el navegador",
-        "author": "Autor"
+        "author": "Autor",
+        "categories": "Categorías",
+        "download": "Descargar e instalar",
+        "mods_for": "Mods de",
+        "to": "en",
+        "files": "Archivos",
+        "description": "Descripción",
+        "screenshots": "Imágenes"
     },
     "games": {
         "game_search": "Buscar juego",
@@ -68,6 +78,10 @@
         "clear_search": "Quitar búsqueda",
         "install_to": "Se instala en",
         "no_mods": "No hay mods en esta página o categoría.",
-        "likes": "{} me gusta"
+        "likes": "{} me gusta",
+        "likes_title": "Me gusta",
+        "updated_title": "Actualizado",
+        "installed": "Instalado",
+        "not_installed": "Sin instalar"
     }
 }

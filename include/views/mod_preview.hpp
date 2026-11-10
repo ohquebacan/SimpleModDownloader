@@ -23,12 +23,14 @@ public:
 private:
     Mod mod;
 
-    BRLS_BIND(brls::Rectangle, image_overlay, "image_overlay");
     BRLS_BIND(brls::Label, title, "mod_preview_title");
+    BRLS_BIND(brls::Label, installed_label, "installed_label");
+    BRLS_BIND(brls::Box, stats_box, "stats_box");
+    BRLS_BIND(brls::Label, files_title, "files_title");
+    BRLS_BIND(brls::Label, install_path, "install_path");
     BRLS_BIND(brls::Label, author, "author");
     BRLS_BIND(brls::Label, description, "description");
     BRLS_BIND(brls::ScrollingFrame, scrolling, "mod_preview_scrolling");
-    BRLS_BIND(brls::Image, banner, "banner");
 
     BRLS_BIND(brls::Box, files_box, "files_box");
     BRLS_BIND(brls::Box, big_image_box, "big_image_box");
@@ -48,7 +50,7 @@ private:
     
     std::mutex bigImageMutex;
 
-    const int bigImageWidth = 1000;
+    const int bigImageWidth = 640;
 
     bool stopThreadFlag = false;
     bool isExiting = false;

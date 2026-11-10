@@ -6,6 +6,9 @@
 #include "utils/config.hpp"
 
 #include <future>
+#include <filesystem>
+#include <regex>
+#include <algorithm>
 
 using namespace brls::literals;
 
@@ -27,6 +30,7 @@ FileBox::FileBox(File& file) {
     date->setText(fmt::format("{} : {}", "menu/mods/date"_i18n, utils::timestamp_to_date(static_cast<time_t>(file.getDate()))));
     size->setText(fmt::format("{} : {}", "menu/mods/size"_i18n, utils::file_size_to_string(file.getSize())));
     download->setText("menu/mods/download"_i18n);
+    download->setStyle(&brls::BUTTONSTYLE_PRIMARY);
     download->setFocusable(true);
 }
 
@@ -38,20 +42,53 @@ ModPreview::ModPreview(Mod& mod, std::vector<unsigned char>& bannerBuffer): mod(
     this->setFocusable(false);
     scrolling->setFocusable(true);
     
-    banner->setImageFromMem(bannerBuffer.data(), bannerBuffer.size());
-    banner->setHeight(200);
-    
-    image_overlay->setColor(nvgRGBA(100, 100, 100, 0.8*255));
     title->setText(this->mod.getName());
-    /* OQB: donde queda el mod al descargarlo, para encontrarlo luego en
-       SimpleModManager con el mismo nombre de juego. */
+    /* OQB: detalle como el mockup. Arriba nombre, autor y si ya esta
+       instalado; a la derecha me gusta, ultima actualizacion, descripcion,
+       archivos (cada uno con su boton) y la carpeta donde se instala. */
+    author->setText(fmt::format("{} {}", "menu/mods/author"_i18n, this->mod.getAuthor()));
+    author->setTextColor(nvgRGB(140, 140, 140));
     {
+        static const std::regex badChars("[:/\\<>|*]");
         std::string folder = utils::modFolderFor(const_cast<Game&>(this->mod.getGame()).getTitle());
+        std::error_code ec;
+        const bool installed = std::filesystem::is_directory(folder + "/" + std::regex_replace(this->mod.getName(), badChars, "-"), ec);
+        installed_label->setText(installed ? "menu/games/installed"_i18n : "");
+        installed_label->setTextColor(nvgRGB(46, 170, 110));
         if (folder.rfind("sdmc:", 0) == 0) folder = folder.substr(5);
-        author->setText(fmt::format("{} : {}   ·   {} {}", "menu/mods/author"_i18n, this->mod.getAuthor(), "menu/games/install_to"_i18n, folder));
+        install_path->setText(fmt::format("{} {}/{}", "menu/games/install_to"_i18n, folder, std::regex_replace(this->mod.getName(), badChars, "-")));
+        install_path->setTextColor(nvgRGB(140, 140, 140));
+    }
+    files_title->setText("menu/mods/files"_i18n);
+    files_title->setTextColor(nvgRGB(140, 140, 140));
+    {
+        auto tileFor = [](const std::string& name, const std::string& value) {
+            auto* tile = new brls::Box(brls::Axis::COLUMN);
+            tile->setCornerRadius(10);
+            tile->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
+            tile->setPadding(8, 14, 10, 14);
+            tile->setMarginRight(10);
+            auto* n = new brls::Label();
+            n->setText(name);
+            n->setFontSize(13);
+            n->setTextColor(nvgRGB(140, 140, 140));
+            tile->addView(n);
+            auto* v = new brls::Label();
+            v->setText(value);
+            v->setFontSize(20);
+            v->setMarginTop(2);
+            tile->addView(v);
+            return tile;
+        };
+        if (this->mod.getLikes() >= 0) stats_box->addView(tileFor("menu/games/likes_title"_i18n, std::to_string(this->mod.getLikes())));
+        int newest = 0;
+        for (auto& f : this->mod.getFiles()) newest = std::max(newest, f.getDate());
+        if (newest > 0) stats_box->addView(tileFor("menu/games/updated_title"_i18n, utils::timestamp_to_date(static_cast<time_t>(newest))));
     }
     description->setText(this->mod.getDescription());
 
+    // OQB: sin imagenes los botones de descarga no aparecian nunca (se ponian al llegar la primera).
+    if (this->mod.getImagesUrl().empty()) brls::sync([this] { loadButtons(); });
     secondThread = std::thread(&ModPreview::loadImages, this);
 
     brls::sync([this] {

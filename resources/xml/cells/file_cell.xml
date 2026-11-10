@@ -1,54 +1,39 @@
 <brls:Box
-    width="1000"
-    height="auto"    
-    axis="row"
-    alignItems="spaceBetween"
-    justifyContent="spaceBetween">
+    width="auto"
+    height="auto"
+    axis="column"
+    marginBottom="12">
+
+    <brls:Label
+        id="title"
+        width="auto"
+        height="auto"
+        fontSize="17"
+        singleLine="true"/>
 
     <brls:Box
         width="auto"
         height="auto"
-        axis="column">
+        axis="row"
+        alignItems="flexStart"
+        marginTop="4"
+        marginBottom="8">
+        <brls:Label
+            id="date"
+            width="auto"
+            height="auto"
+            fontSize="13"
+            marginRight="14"/>
 
         <brls:Label
-            id="title"
+            id="size"
             width="auto"
             height="auto"
-            fontSize="24"
-            marginTop="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginBottom="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginLeft="@style/brls/sidebar/item_accent_margin_sides"
-            marginRight="@style/brls/sidebar/item_accent_margin_sides"/>
-        
-        <brls:Box
-            width="auto"
-            height="auto"
-            axis="row"
-            alignItems="flexStart">
-            <brls:Label
-                id="date"
-                width="auto"
-                height="auto"
-                fontSize="10"
-                marginTop="@style/brls/sidebar/item_accent_margin_top_bottom"
-                marginBottom="@style/brls/sidebar/item_accent_margin_top_bottom"
-                marginLeft="@style/brls/sidebar/item_accent_margin_sides"
-                marginRight="@style/brls/sidebar/item_accent_margin_sides"/>
-
-            <brls:Label
-                id="size"
-                width="auto"
-                height="auto"
-                fontSize="10"
-                marginTop="@style/brls/sidebar/item_accent_margin_top_bottom"
-                marginBottom="@style/brls/sidebar/item_accent_margin_top_bottom"
-                marginLeft="@style/brls/sidebar/item_accent_margin_sides"
-                marginRight="@style/brls/sidebar/item_accent_margin_sides"/>
-        </brls:Box>
+            fontSize="13"/>
     </brls:Box>
 
     <brls:Button
         height="auto"
-        width="20%"
+        width="auto"
         id="download"/>
 </brls:Box>

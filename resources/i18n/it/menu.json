@@ -96,6 +96,10 @@
         "clear_search": "Clear search",
         "install_to": "Installs to",
         "no_mods": "No mods on this page or category.",
-        "likes": "{} likes"
+        "likes": "{} likes",
+        "likes_title": "Likes",
+        "updated_title": "Updated",
+        "installed": "Installed",
+        "not_installed": "Not installed"
     }
 }
