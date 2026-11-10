@@ -4,6 +4,52 @@
     axis="column">
 
     <brls:Box
+        width="auto"
+        height="auto"
+        axis="row"
+        alignItems="center"
+        paddingTop="26"
+        paddingBottom="10"
+        paddingLeft="40"
+        paddingRight="40">
+
+        <brls:Label
+            id="head_title"
+            width="auto"
+            height="auto"
+            fontSize="28"
+            singleLine="true"/>
+
+        <brls:Box
+            id="head_search_box"
+            width="auto"
+            height="auto"
+            axis="row"
+            grow="1.0"
+            marginLeft="24"
+            marginRight="14"
+            paddingTop="8"
+            paddingBottom="8"
+            paddingLeft="16"
+            paddingRight="16">
+
+            <brls:Label
+                id="head_search_label"
+                width="auto"
+                height="auto"
+                fontSize="16"
+                singleLine="true"/>
+        </brls:Box>
+
+        <brls:Box
+            id="head_chips_top"
+            width="auto"
+            height="auto"
+            axis="row"/>
+    </brls:Box>
+
+
+    <brls:Box
         id="loading_box"
         width="auto"
         height="auto"
@@ -37,10 +83,10 @@
             width="auto"
             height="auto"
             axis="column"
-            paddingTop="20"
-            paddingRight="30"
+            paddingTop="10"
+            paddingRight="40"
             paddingBottom="20"
-            paddingLeft="30"/>
+            paddingLeft="40"/>
 
     </brls:ScrollingFrame>
 

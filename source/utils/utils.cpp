@@ -2,6 +2,8 @@
 
 #include <switch.h>
 #include <filesystem>
+#include <nlohmann/json.hpp>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <regex>
@@ -89,38 +91,71 @@ namespace utils {
         int recordCount = 0;
         size_t controlSize = 0;
 
+        /* OQB: cache de nombres e iconos. Pedir el control de cada juego a la
+           consola es lo lento; con la cache solo se pide el de los juegos nuevos
+           y se olvidan los que ya no estan. */
+        const std::string cacheDir = "sdmc:/config/SimpleModDownloader/";
+        const std::string cachePath = cacheDir + "juegos.json";
+        const std::string iconDir = cacheDir + "iconos/";
+        nlohmann::json cache = nlohmann::json::object();
+        {
+            std::ifstream f(cachePath);
+            if (f) {
+                cache = nlohmann::json::parse(f, nullptr, false);
+                if (!cache.is_object()) cache = nlohmann::json::object();
+            }
+        }
+        nlohmann::json nuevo = nlohmann::json::object();
+        std::error_code ec;
+        std::filesystem::create_directories(iconDir, ec);
+        bool cambio = false;
+
         rc = nsListApplicationRecord(records, 64000, 0, &recordCount);
         for (auto i = 0; i < recordCount; ++i) {
             uint64_t tid = records[i].application_id;
-            rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, controlData, sizeof(*controlData), &controlSize);
-            if (R_FAILED(rc))
-                continue;
-
-            /* OQB: antes se saltaban los que no piden usuario al abrir, pero hay
-               juegos que no lo piden (Saints Row, por ejemplo) y no salian. Ahora
-               solo se saltan los forwarders de homebrew: sus ids no empiezan con 01. */
+            /* Antes se saltaban los que no piden usuario al abrir, pero hay juegos
+               que no lo piden (Saints Row, por ejemplo) y no salian. Ahora solo se
+               saltan los forwarders de homebrew: sus ids no empiezan con 01. */
             if ((tid >> 56) != 0x01)
                 continue;
 
-            decompressNacpNames(&controlData->nacp);
-            rc = nacpGetLanguageEntrySpecialLanguage(&controlData->nacp, &langEntry, SetLanguage_ENUS);
-            if (R_FAILED(rc))
-                continue;
-
-            if (!langEntry || !langEntry->name[0])
-                continue;
-
             GameInfo info;
-            info.name = langEntry->name;
             info.tid = formatApplicationId(tid);
-            info.icon.assign(controlData->icon, controlData->icon + 0x20000);
+            const std::string iconPath = iconDir + info.tid + ".jpg";
 
-            // OQB: cuantos mods tiene ya en la carpeta de SimpleModManager.
-            std::error_code ec;
+            if (cache.contains(info.tid) && cache[info.tid].is_string() && std::filesystem::exists(iconPath, ec)) {
+                info.name = cache[info.tid].get<std::string>();
+                std::ifstream ic(iconPath, std::ios::binary);
+                info.icon.assign(std::istreambuf_iterator<char>(ic), std::istreambuf_iterator<char>());
+            }
+            else {
+                rc = nsGetApplicationControlData(NsApplicationControlSource_Storage, tid, controlData, sizeof(*controlData), &controlSize);
+                if (R_FAILED(rc) || controlSize < sizeof(controlData->nacp))
+                    continue;
+                decompressNacpNames(&controlData->nacp);
+                rc = nacpGetLanguageEntrySpecialLanguage(&controlData->nacp, &langEntry, SetLanguage_ENUS);
+                if (R_FAILED(rc) || !langEntry || !langEntry->name[0])
+                    continue;
+                info.name = std::string(langEntry->name, strnlen(langEntry->name, sizeof(langEntry->name)));
+                const size_t iconSize = controlSize - sizeof(controlData->nacp);
+                info.icon.assign(controlData->icon, controlData->icon + iconSize);
+                std::ofstream oc(iconPath, std::ios::binary | std::ios::trunc);
+                oc.write(reinterpret_cast<const char*>(info.icon.data()), info.icon.size());
+                cambio = true;
+            }
+            nuevo[info.tid] = info.name;
+
+            // Cuantos mods tiene ya en la carpeta de SimpleModManager.
             for (const auto& e : std::filesystem::directory_iterator(modFolderFor(info.name), ec))
                 if (e.is_directory(ec)) info.installedMods++;
 
             games.push_back(std::move(info));
+        }
+        if (cambio || nuevo.size() != cache.size()) {
+            for (auto it = cache.begin(); it != cache.end(); ++it)
+                if (!nuevo.contains(it.key())) std::filesystem::remove(iconDir + it.key() + ".jpg", ec);
+            std::ofstream f(cachePath, std::ios::trunc);
+            f << nuevo.dump();
         }
 
         // OQB: cuando se jugo cada uno por ultima vez (para ordenar por recientes).

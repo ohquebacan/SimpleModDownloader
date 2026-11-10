@@ -88,6 +88,9 @@
         "likes_title": "Likes",
         "updated_title": "Updated",
         "installed": "Installed",
-        "not_installed": "Not installed"
+        "not_installed": "Not installed",
+        "header": "Download mods",
+        "more": "More",
+        "page": "Page {}"
     }
 }

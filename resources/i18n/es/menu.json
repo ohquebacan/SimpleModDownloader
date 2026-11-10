@@ -82,6 +82,9 @@
         "likes_title": "Me gusta",
         "updated_title": "Actualizado",
         "installed": "Instalado",
-        "not_installed": "Sin instalar"
+        "not_installed": "Sin instalar",
+        "header": "Descargar mods",
+        "more": "Más opciones",
+        "page": "Página {}"
     }
 }

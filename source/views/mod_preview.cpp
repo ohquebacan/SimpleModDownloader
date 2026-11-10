@@ -96,7 +96,7 @@ ModPreview::ModPreview(Mod& mod, std::vector<unsigned char>& bannerBuffer): mod(
     });
 
     this->registerAction("back", brls::ControllerButton::BUTTON_B, [this](brls::View* view) {
-        brls::sync([this]{ getAppletFrame()->setHeaderVisibility(brls::Visibility::VISIBLE); });
+        brls::sync([this]{ getAppletFrame()->setHeaderVisibility(brls::Visibility::GONE); });
         this->dismiss();
         return true;
     }, true);
@@ -112,7 +112,7 @@ void ModPreview::loadButtons() {
 
             auto startDownload = [this, file]() mutable {
                 brls::sync([this] {
-                    getAppletFrame()->setHeaderVisibility(brls::Visibility::VISIBLE);
+                    getAppletFrame()->setHeaderVisibility(brls::Visibility::GONE);
                 });
                 ProgressEvent::instance().setInterupt(true);
                 this->present(new DownloadView(file));

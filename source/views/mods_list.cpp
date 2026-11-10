@@ -7,6 +7,7 @@
 
 #include <borealis.hpp>
 #include <filesystem>
+#include <fstream>
 #include <regex>
 
 using namespace brls::literals;
@@ -90,12 +91,14 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
 
     this->registerAction("<", brls::ControllerButton::BUTTON_LB, [this](brls::View* view){
         this->modData->getModList()->previousPage();
+        if (this->page > 1) this->page--;
         this->buildGrid(true);
         return true;
     });
 
     this->registerAction(">", brls::ControllerButton::BUTTON_RB, [this](brls::View* view){
         this->modData->getModList()->nextPage();
+        this->page++;
         this->buildGrid(true);
         return true;
     });
@@ -112,6 +115,8 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
             return true;
         }
         this->modData->getModList()->search(search);
+        this->lastSearch = search;
+        this->page = 1;
         this->buildGrid(true);
         return true;
     });
@@ -174,8 +179,27 @@ void ModListTab::buildChips() {
     }
 }
 
+void ModListTab::updateHeader() {
+    headTitle->setText(fmt::format("{} {}", "menu/mods/mods_for"_i18n, gameCopy.getTitle()));
+    headSearchBox->setCornerRadius(10);
+    headSearchBox->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
+    headSearch->setText(this->lastSearch.empty() ? "menu/mods/search"_i18n + " (Y)" : fmt::format("{}: {}", "menu/mods/search"_i18n, this->lastSearch));
+    headSearch->setTextColor(this->lastSearch.empty() ? nvgRGB(140, 140, 140) : nvgRGB(230, 230, 230));
+    headChips->clearViews();
+    auto* chip = new brls::Box(brls::Axis::ROW);
+    chip->setCornerRadius(16);
+    chip->setPadding(6, 14, 6, 14);
+    chip->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
+    auto* l = new brls::Label();
+    l->setText(fmt::format(fmt::runtime("menu/games/page"_i18n), this->page));
+    l->setFontSize(15);
+    chip->addView(l);
+    headChips->addView(chip);
+}
+
 void ModListTab::buildGrid(bool focus) {
     this->stopThumbs();
+    this->updateHeader();
     alive = std::make_shared<std::atomic<bool>>(true);
 
     auto mods = this->modData->getModList()->getMods();
@@ -192,8 +216,8 @@ void ModListTab::buildGrid(bool focus) {
     static const std::regex badChars("[:/\\\\<>|*]");
     const std::string gameFolder = utils::modFolderFor(gameCopy.getTitle());
 
-    constexpr int PER_ROW = 3;
-    constexpr float W = 250.0f, IMG_H = 140.0f;
+    constexpr int PER_ROW = 4;
+    constexpr float W = 286.0f, IMG_H = 160.0f;
     brls::Box* row = nullptr;
     brls::View* first = nullptr;
     std::vector<std::pair<brls::Image*, std::string>> pending;
@@ -258,10 +282,34 @@ void ModListTab::buildGrid(bool focus) {
     // Miniaturas en segundo plano; se ponen en el hilo de la interfaz si la cuadricula sigue viva.
     auto token = alive;
     thumbs = std::thread([pending, token]() {
+        /* OQB: las miniaturas se guardan en la SD; la proxima vez salen al
+           instante sin descargarlas. Si la carpeta pasa de 600, se vacia. */
+        const std::string dir = "sdmc:/config/SimpleModDownloader/miniaturas/";
+        std::error_code ec;
+        std::filesystem::create_directories(dir, ec);
+        {
+            size_t n = 0;
+            for (auto it = std::filesystem::directory_iterator(dir, ec); it != std::filesystem::directory_iterator(); it.increment(ec)) ++n;
+            if (n > 600) {
+                std::filesystem::remove_all(dir, ec);
+                std::filesystem::create_directories(dir, ec);
+            }
+        }
         for (const auto& [image, url] : pending) {
             if (!*token) return;
+            const std::string path = dir + std::to_string(std::hash<std::string>{}(url)) + ".jpg";
             std::vector<unsigned char> buffer;
-            net::downloadImage(url, buffer);
+            if (std::filesystem::exists(path, ec)) {
+                std::ifstream f(path, std::ios::binary);
+                buffer.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+            }
+            if (buffer.empty()) {
+                net::downloadImage(url, buffer);
+                if (!buffer.empty()) {
+                    std::ofstream f(path, std::ios::binary | std::ios::trunc);
+                    f.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+                }
+            }
             if (buffer.empty() || !*token) continue;
             brls::sync([image = image, buffer = std::move(buffer), token]() {
                 if (*token) image->setImageFromMem(buffer.data(), buffer.size());

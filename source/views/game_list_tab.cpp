@@ -2,6 +2,7 @@
 #include "utils/utils.hpp"
 #include "utils/config.hpp"
 #include "views/mods_list.hpp"
+#include "activity/main_activity.hpp"
 
 #include <borealis.hpp>
 #include <algorithm>
@@ -118,6 +119,10 @@ GameListTab::GameListTab() {
         this->applyView(true);
         return true;
     });
+    this->registerAction("menu/games/more"_i18n, brls::ControllerButton::BUTTON_RB, [](brls::View*) {
+        brls::Application::pushActivity(new MoreActivity());
+        return true;
+    });
     this->updateHints();
 
     if (s_cacheLoaded) {
@@ -196,7 +201,7 @@ void GameListTab::applyView(bool focus) {
 
     /* OQB: cuadricula de portadas, 5 por fila. Cada portada se puede enfocar
        y con A abre los mods del juego. */
-    constexpr int PER_ROW = 5;
+    constexpr int PER_ROW = 6;
     grid->clearViews();
     brls::Box* row = nullptr;
     brls::View* first = nullptr;
@@ -217,7 +222,7 @@ void GameListTab::applyView(bool focus) {
 }
 
 brls::View* GameListTab::makeTile(const utils::GameInfo& game) {
-    constexpr float W = 150.0f;
+    constexpr float W = 184.0f;
     auto* tile = new brls::Box(brls::Axis::COLUMN);
     tile->setWidth(W);
     tile->setMarginRight(16);
@@ -260,7 +265,33 @@ brls::View* GameListTab::makeTile(const utils::GameInfo& game) {
     return tile;
 }
 
+// Chip de la barra superior (no se elige: el orden se cambia con X).
+static brls::Box* chipLabel(const std::string& text, bool on) {
+    auto* chip = new brls::Box(brls::Axis::ROW);
+    chip->setCornerRadius(16);
+    chip->setPadding(6, 14, 6, 14);
+    chip->setMarginLeft(8);
+    chip->setBackgroundColor(on ? nvgRGBA(0, 160, 230, 70) : nvgRGBA(128, 128, 128, 30));
+    auto* l = new brls::Label();
+    l->setText(text);
+    l->setFontSize(15);
+    l->setSingleLine(true);
+    chip->addView(l);
+    return chip;
+}
+
 void GameListTab::updateHints() {
+    // OQB: barra superior como el mockup (titulo, buscador y orden).
+    headTitle->setText("menu/games/header"_i18n);
+    headSearchBox->setCornerRadius(10);
+    headSearchBox->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
+    headSearch->setText(this->filter.empty() ? "menu/games/game_search"_i18n + " (Y)"
+                                             : fmt::format("{}: {}  ·  {}", "menu/games/game_search"_i18n, this->filter, this->shown.size()));
+    headSearch->setTextColor(this->filter.empty() ? nvgRGB(140, 140, 140) : nvgRGB(230, 230, 230));
+    headChips->clearViews();
+    const char* chipKeys[] = {"menu/games/sort_recent", "menu/games/sort_az", "menu/games/sort_installed"};
+    for (int i = 0; i < 3; ++i) headChips->addView(chipLabel(brls::getStr(chipKeys[i]), i == this->sortMode));
+
     const char* keys[] = {"menu/games/sort_recent", "menu/games/sort_az", "menu/games/sort_installed"};
     this->updateActionHint(brls::ControllerButton::BUTTON_X, fmt::format(fmt::runtime("menu/games/game_sort"_i18n), brls::getStr(keys[this->sortMode])));
     this->updateActionHint(brls::ControllerButton::BUTTON_Y, this->filter.empty() ? "menu/games/game_search"_i18n : "menu/games/game_search"_i18n + ": " + this->filter);

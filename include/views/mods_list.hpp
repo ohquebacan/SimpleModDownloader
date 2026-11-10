@@ -66,6 +66,13 @@ public:
 private:
     // OQB: cuadricula de mods con categorias arriba (antes una lista)
     BRLS_BIND(brls::Box, chips, "mod_chips");
+    BRLS_BIND(brls::Label, headTitle, "mhead_title");
+    BRLS_BIND(brls::Box, headSearchBox, "mhead_search_box");
+    BRLS_BIND(brls::Label, headSearch, "mhead_search_label");
+    BRLS_BIND(brls::Box, headChips, "mhead_chips_top");
+    std::string lastSearch;
+    int page = 1;
+    void updateHeader();
     BRLS_BIND(brls::ScrollingFrame, scroll, "mod_scroll");
     BRLS_BIND(brls::Box, grid, "mod_grid");
 
