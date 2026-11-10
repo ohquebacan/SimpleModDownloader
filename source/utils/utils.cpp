@@ -7,6 +7,8 @@
 #include <regex>
 #include <borealis.hpp>
 #include <SimpleIniParser.hpp>
+#include <cstring>
+#include <zlib.h>
 
 
 using namespace simpleIniParser;
@@ -42,6 +44,33 @@ namespace utils {
     }
 
 
+    /* OQB: desde el firmware 21, las actualizaciones de los juegos traen los
+       nombres comprimidos (zlib, para que entren 32 idiomas): el byte 0x3215 de
+       la NACP vale 1 y libnx los da tal cual, asi que salian "?" y simbolos raros
+       (en la busqueda de GameBanana y en la carpeta de /mods que lee
+       SimpleModManager). Esto los descomprime en su lugar. Ver switchbrew/libnx#714. */
+    bool decompressNacpNames(NacpStruct* nacp)
+    {
+        auto* raw = reinterpret_cast<u8*>(nacp);
+        if (raw[0x3215] != 1) return true;
+        u16 size = 0;
+        std::memcpy(&size, raw, sizeof(size));
+        if (size == 0 || size > 0x3000 - 2) return false;
+        std::vector<u8> out(0x6000);
+        z_stream z{};
+        z.next_in = raw + 2;
+        z.avail_in = size;
+        z.next_out = out.data();
+        z.avail_out = out.size();
+        if (inflateInit2(&z, -15) != Z_OK) return false;
+        const int r = inflate(&z, Z_FINISH);
+        inflateEnd(&z);
+        if (r != Z_STREAM_END || z.total_out < 0x3000) return false;
+        std::memcpy(raw, out.data(), 0x3000);  // los 16 primeros idiomas
+        raw[0x3215] = 0;
+        return true;
+    }
+
     std::string formatApplicationId(u64 ApplicationId)
     {
         std::stringstream strm;
@@ -71,11 +100,12 @@ namespace utils {
             if (controlData->nacp.startup_user_account == 0)
                 continue;
 
+            decompressNacpNames(&controlData->nacp);
             rc = nacpGetLanguageEntrySpecialLanguage(&controlData->nacp, &langEntry, SetLanguage_ENUS);
             if (R_FAILED(rc))
                 continue;
 
-            if (!langEntry->name)
+            if (!langEntry || !langEntry->name[0])
                 continue;
 
             GameInfo info;
