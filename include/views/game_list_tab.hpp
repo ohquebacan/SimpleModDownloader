@@ -17,6 +17,10 @@ class GameCell : public brls::RecyclerCell
     static GameCell* create();
 };
 
+// Abre la lista de mods de un juego (antes vivia en GameData::didSelectRowAt).
+void openGame(brls::View* from, const utils::GameInfo& game);
+std::string gameSubtitle(const utils::GameInfo& game);
+
 class GameData : public brls::RecyclerDataSource
 {
   public:
@@ -38,7 +42,8 @@ public:
 
     static brls::View* create();
 private:
-    BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
+    BRLS_BIND(brls::ScrollingFrame, gridScroll, "grid_scroll");
+    BRLS_BIND(brls::Box, grid, "grid");
     BRLS_BIND(brls::Box, loading_box, "loading_box");
     BRLS_BIND(brls::Label, loading_label, "loading_label");
     BRLS_BIND(brls::ProgressSpinner, loading_spinner, "loading_spinner");
@@ -52,7 +57,9 @@ private:
 
     // OQB: buscador y orden
     std::string filter;
+    std::vector<utils::GameInfo> shown;
     int sortMode = 0;  // 0 recientes, 1 A-Z, 2 con mods
-    void applyView();
+    void applyView(bool focus = false);
     void updateHints();
+    brls::View* makeTile(const utils::GameInfo& game);
 };

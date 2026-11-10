@@ -22,12 +22,9 @@ GameCell* GameCell::create()
     return new GameCell();
 }
 
-brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+std::string gameSubtitle(const utils::GameInfo& game)
 {
-    auto cell = (GameCell*)recycler->dequeueReusableCell("Cell");
-    const auto& game = games[indexPath.row];
-    cell->label->setText(game.name);
-    /* OQB: lo util en vez del TitleID: cuantos mods tiene ya y cuando se jugo. */
+    // OQB: lo util en vez del TitleID: cuantos mods tiene ya y cuando se jugo.
     std::string sub;
     if (game.installedMods == 1) sub = "menu/games/installed_one"_i18n;
     else if (game.installedMods > 1) sub = fmt::format(fmt::runtime("menu/games/installed_many"_i18n), game.installedMods);
@@ -42,15 +39,12 @@ brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::In
     }
     if (!played.empty()) sub += (sub.empty() ? "" : "  ·  ") + played;
     if (sub.empty()) sub = fmt::format("TitleID : {}", game.tid);
-    cell->subtitle->setText(sub);
-    if (!game.icon.empty())
-        cell->image->setImageFromMem(game.icon.data(), game.icon.size());
-    return cell;
+    return sub;
 }
 
-void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+void openGame(brls::View* from, const utils::GameInfo& info)
 {
-    Game game(games[indexPath.row].name, games[indexPath.row].tid);
+    Game game(info.name, info.tid);
     if(game.getGamebananaID() == 0) {
         auto dialog = new brls::Dialog("menu/notify/no_games_gamebanana"_i18n);
         dialog->addButton("hints/ok"_i18n, []() {});
@@ -64,7 +58,23 @@ void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath ind
         return;
     }
     auto modListTab = new ModListTab(game);
-    recycler->present(modListTab);
+    from->present(modListTab);
+}
+
+brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+{
+    auto cell = (GameCell*)recycler->dequeueReusableCell("Cell");
+    const auto& game = games[indexPath.row];
+    cell->label->setText(game.name);
+    cell->subtitle->setText(gameSubtitle(game));
+    if (!game.icon.empty())
+        cell->image->setImageFromMem(game.icon.data(), game.icon.size());
+    return cell;
+}
+
+void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+{
+    openGame(recycler, games[indexPath.row]);
 }
 
 GameData::GameData(std::vector<utils::GameInfo> g) : games(std::move(g)) {
@@ -87,27 +97,25 @@ GameListTab::GameListTab() {
     this->inflateFromXMLRes("xml/tabs/game_list_tab.xml");
 
     gameData = new GameData();
-    recycler->estimatedRowHeight = 100;
-    recycler->registerCell("Cell", []() { return GameCell::create(); });
 
     this->registerAction("menu/games/game_search"_i18n, brls::ControllerButton::BUTTON_Y, [this](brls::View*) {
         if (isLoading) return true;
         brls::Application::getImeManager()->openForText([this](std::string text) {
             this->filter = text;
         }, "menu/games/game_search"_i18n, "", 40, this->filter);
-        this->applyView();
+        this->applyView(true);
         return true;
     });
     this->registerAction("", brls::ControllerButton::BUTTON_X, [this](brls::View*) {
         if (isLoading) return true;
         this->sortMode = (this->sortMode + 1) % 3;
-        this->applyView();
+        this->applyView(true);
         return true;
     });
     this->registerAction("menu/games/clear_search"_i18n, brls::ControllerButton::BUTTON_BACK, [this](brls::View*) {
         if (this->filter.empty()) return true;
         this->filter.clear();
-        this->applyView();
+        this->applyView(true);
         return true;
     });
     this->updateHints();
@@ -118,7 +126,6 @@ GameListTab::GameListTab() {
         return;
     }
 
-    recycler->setDataSource(gameData, false);
     loading_label->setText("Loading games...");
     loading_spinner->animate(true);
 
@@ -159,7 +166,7 @@ namespace {
 }
 
 // OQB: la lista que se ve, filtrada por el buscador y en el orden elegido.
-void GameListTab::applyView() {
+void GameListTab::applyView(bool focus) {
     std::vector<utils::GameInfo> list;
     const std::string f = lower(this->filter);
     for (const auto& g : s_cachedGames)
@@ -183,14 +190,74 @@ void GameListTab::applyView() {
         dialog->addButton("hints/ok"_i18n, []() {});
         dialog->open();
         this->filter.clear();
-        this->applyView();
+        this->applyView(focus);
         return;
     }
-    auto* old = gameData;
-    gameData = new GameData(std::move(list));
-    recycler->setDataSource(gameData, false);
-    delete old;
+
+    /* OQB: cuadricula de portadas, 5 por fila. Cada portada se puede enfocar
+       y con A abre los mods del juego. */
+    constexpr int PER_ROW = 5;
+    grid->clearViews();
+    brls::Box* row = nullptr;
+    brls::View* first = nullptr;
+    for (size_t i = 0; i < list.size(); ++i) {
+        if (i % PER_ROW == 0) {
+            row = new brls::Box(brls::Axis::ROW);
+            row->setMarginBottom(18);
+            grid->addView(row);
+        }
+        auto* tile = this->makeTile(list[i]);
+        row->addView(tile);
+        if (!first) first = tile;
+    }
+    this->shown = std::move(list);
+    gridScroll->setContentOffsetY(0, false);
+    if (focus && first) brls::Application::giveFocus(first);
     this->updateHints();
+}
+
+brls::View* GameListTab::makeTile(const utils::GameInfo& game) {
+    constexpr float W = 150.0f;
+    auto* tile = new brls::Box(brls::Axis::COLUMN);
+    tile->setWidth(W);
+    tile->setMarginRight(16);
+    tile->setFocusable(true);
+    tile->setHighlightCornerRadius(12);
+    tile->setPadding(6, 6, 8, 6);
+
+    auto* image = new brls::Image();
+    image->setWidth(W - 12);
+    image->setHeight(W - 12);
+    image->setCornerRadius(10);
+    image->setScalingType(brls::ImageScalingType::FILL);
+    if (!game.icon.empty()) image->setImageFromMem(game.icon.data(), game.icon.size());
+    tile->addView(image);
+
+    auto* name = new brls::Label();
+    name->setText(game.name);
+    name->setFontSize(16);
+    name->setSingleLine(true);
+    name->setMarginTop(8);
+    name->setWidth(W - 12);
+    tile->addView(name);
+
+    const std::string sub = gameSubtitle(game);
+    auto* subLabel = new brls::Label();
+    subLabel->setText(game.installedMods > 0 ? sub.substr(0, sub.find("  ·  ")) : (game.playedKnown ? sub : ""));
+    subLabel->setFontSize(13);
+    subLabel->setSingleLine(true);
+    subLabel->setWidth(W - 12);
+    subLabel->setMarginTop(2);
+    subLabel->setTextColor(game.installedMods > 0 ? nvgRGB(46, 170, 110) : nvgRGB(140, 140, 140));
+    tile->addView(subLabel);
+
+    utils::GameInfo copy = game;
+    tile->registerClickAction([tile, copy](brls::View*) {
+        openGame(tile, copy);
+        return true;
+    });
+    tile->addGestureRecognizer(new brls::TapGestureRecognizer(tile));
+    return tile;
 }
 
 void GameListTab::updateHints() {

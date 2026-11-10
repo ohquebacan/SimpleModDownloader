@@ -23,14 +23,20 @@
             margin="10"/>
     </brls:Box>
 
-    <brls:RecyclerFrame
-        id="recycler"
+    <brls:ScrollingFrame
+        id="grid_scroll"
         width="auto"
         height="auto"
         grow="1.0"
-        paddingTop="@style/brls/sidebar/padding_top"
-        paddingRight="@style/brls/sidebar/padding_right"
-        paddingBottom="@style/brls/sidebar/padding_bottom"
-        paddingLeft="@style/brls/sidebar/padding_left"/>
+        paddingTop="20"
+        paddingRight="30"
+        paddingBottom="20"
+        paddingLeft="30">
+        <brls:Box
+            id="grid"
+            width="auto"
+            height="auto"
+            axis="column"/>
+    </brls:ScrollingFrame>
 
 </brls:Box>
