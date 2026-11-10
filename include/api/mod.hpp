@@ -57,6 +57,10 @@ class Mod {
         std::vector<std::string> getImagesUrl() { return imageUrls; }
         std::string getAuthor() { return author; }
         const Game& getGame() const { return game; }
+        // OQB: miniatura (220 px) y me gusta, de la lista de GameBanana
+        std::string getThumbUrl() const { return thumbUrl; }
+        int getLikes() const { return likes; }
+        void setListInfo(const std::string& thumb, int likeCount) { thumbUrl = thumb; likes = likeCount; }
 
         void loadMod();
     private:
@@ -72,6 +76,8 @@ class Mod {
 
         std::vector<unsigned char> imageBuffer;
         std::string author;
+        std::string thumbUrl;
+        int likes = -1;
 
         const Game& game;
 };  

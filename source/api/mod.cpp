@@ -171,6 +171,19 @@ void ModList::updatePage() {
         std::vector<std::string> images;
 
         Mod newMod(name, ID, images, author, game);
+        // OQB: miniatura y me gusta para la cuadricula (si la API los trae).
+        try {
+            std::string thumb;
+            if (mod.contains("_aPreviewMedia") && mod["_aPreviewMedia"].is_object() && mod["_aPreviewMedia"].contains("_aImages")
+                && mod["_aPreviewMedia"]["_aImages"].is_array() && !mod["_aPreviewMedia"]["_aImages"].empty()) {
+                const auto& img = mod["_aPreviewMedia"]["_aImages"][0];
+                const std::string base = img.contains("_sBaseUrl") && img["_sBaseUrl"].is_string() ? img["_sBaseUrl"].get<std::string>() : "https://images.gamebanana.com/img/ss/mods";
+                const char* key = img.contains("_sFile220") ? "_sFile220" : "_sFile";
+                if (img.contains(key) && img[key].is_string()) thumb = base + "/" + img[key].get<std::string>();
+            }
+            const int likes = mod.contains("_nLikeCount") && mod["_nLikeCount"].is_number_integer() ? mod["_nLikeCount"].get<int>() : -1;
+            newMod.setListInfo(thumb, likes);
+        } catch (...) {}
 
         mods.push_back(newMod);
     }

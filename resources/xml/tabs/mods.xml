@@ -1,17 +1,36 @@
-<brls:Box    
+<brls:Box
     width="auto"
     height="auto"
     axis="column">
 
-    <brls:RecyclerFrame
-        id="modrecycler"
-        grow="1.0"
+    <brls:Box
+        id="mod_chips"
         width="auto"
         height="auto"
-        paddingTop="@style/brls/sidebar/padding_top"
-        paddingRight="@style/brls/sidebar/padding_right"
-        paddingBottom="@style/brls/sidebar/padding_bottom"
-        paddingLeft="@style/brls/sidebar/padding_left"/>
-    
+        axis="row"
+        paddingTop="16"
+        paddingLeft="30"
+        paddingRight="30"/>
+
+    <brls:ScrollingFrame
+        id="mod_scroll"
+        width="auto"
+        height="auto"
+        axis="column"
+        alignItems="stretch"
+        scrollingBehavior="centered"
+        grow="1.0">
+
+        <brls:Box
+            id="mod_grid"
+            width="auto"
+            height="auto"
+            axis="column"
+            paddingTop="16"
+            paddingRight="30"
+            paddingBottom="20"
+            paddingLeft="30"/>
+
+    </brls:ScrollingFrame>
 
 </brls:Box>

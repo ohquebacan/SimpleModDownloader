@@ -66,6 +66,8 @@
         "played_months": "Jugado hace {} meses",
         "no_match": "Ningún juego coincide con «{}»",
         "clear_search": "Quitar búsqueda",
-        "install_to": "Se instala en"
+        "install_to": "Se instala en",
+        "no_mods": "No hay mods en esta página o categoría.",
+        "likes": "{} me gusta"
     }
 }

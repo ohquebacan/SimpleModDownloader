@@ -82,6 +82,8 @@
         "played_months": "Played {} months ago",
         "no_match": "No game matches “{}”",
         "clear_search": "Clear search",
-        "install_to": "Installs to"
+        "install_to": "Installs to",
+        "no_mods": "No mods on this page or category.",
+        "likes": "{} likes"
     }
 }

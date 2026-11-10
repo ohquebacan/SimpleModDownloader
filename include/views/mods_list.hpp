@@ -1,6 +1,9 @@
 #pragma once
 
 #include <borealis.hpp>
+#include <atomic>
+#include <memory>
+#include <thread>
 
 #include "api/mod.hpp"
 #include "api/game.hpp"
@@ -46,6 +49,7 @@ public:
     std::string titleForHeader(brls::RecyclerFrame* recycler, int section) override;
 
     std::unique_ptr<ModList>& getModList() { return modList; }
+    std::vector<unsigned char>& getBanner() { return bannerBuffer; }
 private:
     Game& game;
     std::unique_ptr<ModList> modList;
@@ -57,11 +61,20 @@ class ModListTab : public brls::Box {
 public:
     ModListTab(Game& game);
     ModListTab();
-
-    //static brls::View* create();
+    ~ModListTab() override;
 
 private:
-    BRLS_BIND(brls::RecyclerFrame, recycler, "modrecycler");
+    // OQB: cuadricula de mods con categorias arriba (antes una lista)
+    BRLS_BIND(brls::Box, chips, "mod_chips");
+    BRLS_BIND(brls::ScrollingFrame, scroll, "mod_scroll");
+    BRLS_BIND(brls::Box, grid, "mod_grid");
 
     std::unique_ptr<ModData> modData;
+    Game gameCopy;
+    std::shared_ptr<std::atomic<bool>> alive;
+    std::thread thumbs;
+
+    void buildChips();
+    void buildGrid(bool focus);
+    void stopThumbs();
 };
