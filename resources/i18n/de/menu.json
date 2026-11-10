@@ -1,53 +1,45 @@
 {
     "main": {
-        "app_name" : "SimpleModDownloader"
+        "app_name": "SimpleModDownloader"
     },
-
     "title": {
         "downloading_smm": "SimpleModManager herunterladen",
         "downloading": "Herunterladen",
         "extracting": "Extrahieren läuft (Bitte die Anwendung nicht schließen)"
     },
-    
     "tabs": {
         "downloads": "Downloads",
         "install": "Installation",
         "about": "Über uns"
     },
-    
-    "notify" : {
-        "no_games_gamebanana" : "Keine Spiele in der GameBanana-Datenbank gefunden",
+    "notify": {
+        "no_games_gamebanana": "Keine Spiele in der GameBanana-Datenbank gefunden",
         "not_supported": "Dieses Format wird nicht unterstützt: "
     },
-    
     "worker": {
         "of": "von",
         "cancel": "Abbrechen",
         "install": "Installation von",
         "remaining": "Verbleibende Zeit"
     },
-    
     "about": {
         "title": "Über SimpleModDownloader",
         "description": "SimpleModDownloader ist eine Anwendung, die es ermöglicht, Mods für Nintendo Switch-Spiele herunterzuladen und zu installieren. Sie wurde von PoloNX erstellt.",
-        "thanks": "\u25c6 Vielen Dank an @nadrino für SimpleModManager\n\u25c6 Vielen Dank an Natinusala und HamletDuFromage für borealis\n\u25c6 Vielen Dank an Pikatsuto für das Logo und SuperButterScotch für die Typografie",
-        "translator": "\u25c6 Dank an die Übersetzer"
+        "thanks": "◆ Vielen Dank an @nadrino für SimpleModManager\n◆ Vielen Dank an Natinusala und HamletDuFromage für borealis\n◆ Vielen Dank an Pikatsuto für das Logo und SuperButterScotch für die Typografie",
+        "translator": "◆ Dank an die Übersetzer"
     },
-    
     "label": {
-        "no_games" : "Keine Spiele auf der Switch gefunden",
+        "no_games": "Keine Spiele auf der Switch gefunden",
         "install": "Installation",
         "desc_install": "Um Mods zu installieren, müssen Sie die Anwendung SimpleModManager von @nadrino verwenden.",
         "extract": "Die Extraktion ist abgeschlossen. Gehen Sie zur Installation im Installations-Tab."
     },
-    
-    "item" : {
-        "launch_smm" : "SimpleModManager starten",
+    "item": {
+        "launch_smm": "SimpleModManager starten",
         "download_smm": "SimpleModManager herunterladen"
     },
-    
     "mods": {
-        "mods_list_title" : "Mod-Liste",
+        "mods_list_title": "Mod-Liste",
         "search": "Suchen",
         "search_placeholder": "Geben Sie den Mod-Namen ein (mindestens 3 Zeichen)",
         "cancel": "Abbrechen",
@@ -57,5 +49,22 @@
         "images": "Bilder anzeigen",
         "browser": "Im Browser öffnen",
         "author": "Autor"
+    },
+    "games": {
+        "game_search": "Search game",
+        "game_sort": "Sort: {}",
+        "sort_recent": "Recent",
+        "sort_az": "A-Z",
+        "sort_installed": "With mods",
+        "installed_one": "1 mod installed",
+        "installed_many": "{} mods installed",
+        "played_now": "Played a moment ago",
+        "played_hours": "Played {} h ago",
+        "played_yesterday": "Played yesterday",
+        "played_days": "Played {} days ago",
+        "played_months": "Played {} months ago",
+        "no_match": "No game matches “{}”",
+        "clear_search": "Clear search",
+        "install_to": "Installs to"
     }
 }

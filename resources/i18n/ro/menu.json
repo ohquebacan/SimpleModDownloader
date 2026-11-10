@@ -2,50 +2,42 @@
     "main": {
         "app_name": "SimpleModDownloader"
     },
-
     "title": {
         "downloading_smm": "SimpleModManager se descarcă",
         "downloading": "În curs de descărcare",
         "extracting": "În curs de extragere (nu închide aplicația)"
     },
-    
     "tabs": {
         "downloads": "Descărcări",
         "install": "Instalare",
         "about": "Despre"
     },
-    
     "notify": {
         "no_games_gamebanana": "Niciun joc nu a fost găsit în baza de date GameBanana",
         "not_supported": "Acest format nu este susținut: "
     },
-    
     "worker": {
         "of": "din",
         "cancel": "Anulează",
         "install": "În curs de instalare",
         "remaining": "Timp rămas"
     },
-    
     "about": {
         "title": "Despre SimpleModDownloader",
         "description": "SimpleModDownloader este o aplicație care îți permite să descarci și instalezi mod-uri de jocuri de Nintendo Switch creat de PoloNX.",
-        "thanks": "\u25c6 Mulțumim @nadrino pentru SimpleModManager\n\u25c6 Mulțumim Natinusala și HamletDuFromage pentru borealis\n\u25c6 Mulțumim Pikatsuto pentru logo și SuperButterScotch pentru tipografie\n\u25c6 Mulțumim NicholeMattera pentru Simple-INI-Parser",
-        "translator": "\u25c6 Mulțumiri lui ExFabian pentru traducere."
+        "thanks": "◆ Mulțumim @nadrino pentru SimpleModManager\n◆ Mulțumim Natinusala și HamletDuFromage pentru borealis\n◆ Mulțumim Pikatsuto pentru logo și SuperButterScotch pentru tipografie\n◆ Mulțumim NicholeMattera pentru Simple-INI-Parser",
+        "translator": "◆ Mulțumiri lui ExFabian pentru traducere."
     },
-    
     "label": {
         "no_games": "Niciun joc găsit în Switch",
         "install": "Instalare",
         "desc_install": "Pentru a instala mod-uri, trebuie să folosești aplicația SimpleModManager creată de @nadrino.",
         "extract": "Extragerea este completă. Pentru a instala mod-ul, mergi la fila de Instalare."
     },
-    
     "item": {
         "launch_smm": "Deschide SimpleModManager",
         "download_smm": "Descarcă SimpleModManager"
     },
-    
     "mods": {
         "mods_list_title": "Listă de Mod-uri",
         "search": "Caută",
@@ -57,5 +49,22 @@
         "images": "Vezi Imagini",
         "browser": "Deschide în Browser",
         "author": "Autor"
+    },
+    "games": {
+        "game_search": "Search game",
+        "game_sort": "Sort: {}",
+        "sort_recent": "Recent",
+        "sort_az": "A-Z",
+        "sort_installed": "With mods",
+        "installed_one": "1 mod installed",
+        "installed_many": "{} mods installed",
+        "played_now": "Played a moment ago",
+        "played_hours": "Played {} h ago",
+        "played_yesterday": "Played yesterday",
+        "played_days": "Played {} days ago",
+        "played_months": "Played {} months ago",
+        "no_match": "No game matches “{}”",
+        "clear_search": "Clear search",
+        "install_to": "Installs to"
     }
 }

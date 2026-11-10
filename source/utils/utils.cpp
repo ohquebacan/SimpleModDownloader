@@ -112,12 +112,41 @@ namespace utils {
             info.name = langEntry->name;
             info.tid = formatApplicationId(tid);
             info.icon.assign(controlData->icon, controlData->icon + 0x20000);
+
+            // OQB: cuantos mods tiene ya en la carpeta de SimpleModManager.
+            std::error_code ec;
+            for (const auto& e : std::filesystem::directory_iterator(modFolderFor(info.name), ec))
+                if (e.is_directory(ec)) info.installedMods++;
+
             games.push_back(std::move(info));
+        }
+
+        // OQB: cuando se jugo cada uno por ultima vez (para ordenar por recientes).
+        if (R_SUCCEEDED(pdmqryInitialize())) {
+            for (auto& g : games) {
+                const u64 id = std::stoull(g.tid, nullptr, 16);
+                PdmLastPlayTime last{};
+                s32 total = 0;
+                if (R_SUCCEEDED(pdmqryQueryLastPlayTime(false, &last, &id, 1, &total)) && total > 0 && last.flag) {
+                    g.lastPlayed = last.timestamp_user;
+                    g.minutesAgo = last.last_played_minutes;
+                    g.playedKnown = true;
+                }
+            }
+            pdmqryExit();
         }
 
         delete[] records;
         delete controlData;
         return games;
+    }
+
+    std::string modFolderFor(const std::string& gameName) {
+        static const std::regex badChars("[:/\\<>|*]");
+        std::string base = getModInstallPath();
+        while (!base.empty() && base.front() == '/') base.erase(base.begin());
+        static const std::regex accent("é");
+        return "sdmc:/" + base + "/" + std::regex_replace(std::regex_replace(gameName, badChars, "-"), accent, "e");
     }
 
     std::string removeHtmlTags(const std::string& input) {

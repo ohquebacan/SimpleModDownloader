@@ -2,14 +2,12 @@
     "main": {
         "app_name": "SimpleModDownloader"
     },
-
     "title": {
         "downloading_smm": "Scaricando SimpleModManager",
         "downloading_smd": "Scaricando SimpleModDownloader",
         "downloading": "Scaricando",
         "extracting": "Estraendo"
     },
-    
     "tabs": {
         "downloads": "Downloads",
         "install": "Installazione",
@@ -17,7 +15,6 @@
         "about": "Informazioni",
         "settings": "Impostazioni"
     },
-    
     "notify": {
         "no_games_gamebanana": "No giochi trovati nel database di GameBanana",
         "not_supported": "Questo formato non è supportato: ",
@@ -25,43 +22,38 @@
         "mod_unsupported": "La mod non è supportata da SimpleModDownloader",
         "smash_bros": "Super Smash Bros. Ultimate utilizza ARCropolis mod manager. SimpleModDownloader lo supporta, non utilizzare SimpleModManager per installare la mod"
     },
-    
     "worker": {
         "of": "di",
         "cancel": "Cancella",
         "install": "Installazione",
         "remaining": "Tempo rimanente"
     },
-    
     "about": {
         "title": "Riguardo SimpleModDownloader",
         "description": "SimpleModDownloader è un'applicazione che ti permette di scaricare e installare mods per giochi Nintendo Switch creata da PoloNX.",
-        "thanks": "\u25c6 Grazie a @nadrino per SimpleModManager\n\u25c6 Grazie a Natinusala, xfangfang e XITRIX per borealis\n\u25c6 Grazie a Pikatsuto per il logo e SuperButterScotch per la tipografia\n\u25c6 Grazie a NicholeMattera per Simple-INI-Parser",
-        "translator": "\u25c6 Gabriele73."
+        "thanks": "◆ Grazie a @nadrino per SimpleModManager\n◆ Grazie a Natinusala, xfangfang e XITRIX per borealis\n◆ Grazie a Pikatsuto per il logo e SuperButterScotch per la tipografia\n◆ Grazie a NicholeMattera per Simple-INI-Parser",
+        "translator": "◆ Gabriele73."
     },
-    
     "label": {
         "no_games": "Nessun gioco trovato sulla Switch.",
         "install": "Installazione",
         "desc_install": "Per installare le mod, devi utilizzare l'applicazione SimpleModManager creata da @nadrino.",
         "extract": "L'estrazione è stata completata. Per installare la mod, vai nella scheda installazione.",
         "update": "Aggiorna App",
-        "new_update": "\u25c6 Versione installata :",
-        "available_version" : "\u25c6 Versione disponibile :",
+        "new_update": "◆ Versione installata :",
+        "available_version": "◆ Versione disponibile :",
         "restart_smd": "Riavvia SimpleModDownloader per applicare l'aggiornamento.",
         "no_internet": "Nessuna connessione ad internet.",
-        "desc_smd": "\u25c6 Puoi aggiornare l'app in uso sulla tua switch",
+        "desc_smd": "◆ Puoi aggiornare l'app in uso sulla tua switch",
         "path": "Percorso",
         "url": "Url"
     },
-    
     "item": {
         "launch_smm": "Avvia SimpleModManager",
         "download_smm": "Scarica SimpleModManager",
         "download_smd": "Scarica SimpleModDownloader",
         "check_update": "Controlla aggiornamenti"
     },
-    
     "mods": {
         "mods_list_title": "Lista Mod",
         "search": "Cerca",
@@ -70,7 +62,7 @@
         "links": "Scarica Link(s)",
         "size": "Dimensione",
         "date": "Data",
-        "screenshots" : "Screenshot",
+        "screenshots": "Screenshot",
         "description": "Descrizione",
         "browser": "Apri sul Browser",
         "author": "Autore",
@@ -80,13 +72,28 @@
         "mods_for": "Mod per",
         "files": "File"
     },
-
-    "settings_tab" : {
-        "language" : "Seleziona lingua",
-        "debug" : "Layer di Debug"
+    "settings_tab": {
+        "language": "Seleziona lingua",
+        "debug": "Layer di Debug"
     },
-
-    "crash" : {
-        "sd_full" : "La scheda SD è piena. Per favore libera un po' di spazio e riavvia l'applicazione."
+    "crash": {
+        "sd_full": "La scheda SD è piena. Per favore libera un po' di spazio e riavvia l'applicazione."
+    },
+    "games": {
+        "game_search": "Search game",
+        "game_sort": "Sort: {}",
+        "sort_recent": "Recent",
+        "sort_az": "A-Z",
+        "sort_installed": "With mods",
+        "installed_one": "1 mod installed",
+        "installed_many": "{} mods installed",
+        "played_now": "Played a moment ago",
+        "played_hours": "Played {} h ago",
+        "played_yesterday": "Played yesterday",
+        "played_days": "Played {} days ago",
+        "played_months": "Played {} months ago",
+        "no_match": "No game matches “{}”",
+        "clear_search": "Clear search",
+        "install_to": "Installs to"
     }
 }

@@ -56,6 +56,7 @@ class Mod {
         std::vector<File> getFiles() { return files; }
         std::vector<std::string> getImagesUrl() { return imageUrls; }
         std::string getAuthor() { return author; }
+        const Game& getGame() const { return game; }
 
         void loadMod();
     private:

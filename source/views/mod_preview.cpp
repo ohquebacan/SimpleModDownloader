@@ -43,7 +43,13 @@ ModPreview::ModPreview(Mod& mod, std::vector<unsigned char>& bannerBuffer): mod(
     
     image_overlay->setColor(nvgRGBA(100, 100, 100, 0.8*255));
     title->setText(this->mod.getName());
-    author->setText(fmt::format("{} : {}", "menu/mods/author"_i18n, this->mod.getAuthor()));
+    /* OQB: donde queda el mod al descargarlo, para encontrarlo luego en
+       SimpleModManager con el mismo nombre de juego. */
+    {
+        std::string folder = utils::modFolderFor(const_cast<Game&>(this->mod.getGame()).getTitle());
+        if (folder.rfind("sdmc:", 0) == 0) folder = folder.substr(5);
+        author->setText(fmt::format("{} : {}   ·   {} {}", "menu/mods/author"_i18n, this->mod.getAuthor(), "menu/games/install_to"_i18n, folder));
+    }
     description->setText(this->mod.getDescription());
 
     secondThread = std::thread(&ModPreview::loadImages, this);

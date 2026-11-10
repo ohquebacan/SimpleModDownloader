@@ -49,4 +49,10 @@ private:
 
     static std::vector<utils::GameInfo> s_cachedGames;
     static bool s_cacheLoaded;
+
+    // OQB: buscador y orden
+    std::string filter;
+    int sortMode = 0;  // 0 recientes, 1 A-Z, 2 con mods
+    void applyView();
+    void updateHints();
 };

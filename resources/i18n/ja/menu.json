@@ -2,50 +2,42 @@
     "main": {
         "app_name": "SimpleModDownloader"
     },
-
     "title": {
         "downloading_smm": "SimpleModManagerのダウンロード中",
         "downloading": "ダウンロード中",
         "extracting": "展開中 （アプリを閉じないでください）"
     },
-    
     "tabs": {
         "downloads": "ダウンロード",
         "install": "インストール",
         "about": "情報"
     },
-    
     "notify": {
         "no_games_gamebanana": "GameBananaデータベースにゲームが見つかりませんでした",
         "not_supported": "この形式はサポートされていません: "
     },
-    
     "worker": {
         "of": "/",
         "cancel": "キャンセル",
         "install": "インストール中",
         "remaining": "残り時間"
     },
-    
     "about": {
         "title": "SimpleModDownloaderについて",
         "description": "SimpleModDownloaderは、PoloNXによって作成されたNintendo Switchゲーム用のMODをダウンロードしてインストールするためのHomebrewアプリです。",
-		"thanks": "\u25c6 SimpleModManagerには@nadrinoさんへの感謝を捧げます\n\u25c6 borealisにはNatinusalaとHamletDuFromageへの感謝を捧げます\n\u25c6 ロゴにはPikatsuto、タイポグラフィにはSuperButterScotchへの感謝を捧げます\n\u25c6 Simple-INI-ParserにはNicholeMatteraへの感謝を捧げます",
-        "translator:": "\u25c6 iGlitchさん、翻訳ありがとうございます。"
+        "thanks": "◆ SimpleModManagerには@nadrinoさんへの感謝を捧げます\n◆ borealisにはNatinusalaとHamletDuFromageへの感謝を捧げます\n◆ ロゴにはPikatsuto、タイポグラフィにはSuperButterScotchへの感謝を捧げます\n◆ Simple-INI-ParserにはNicholeMatteraへの感謝を捧げます",
+        "translator:": "◆ iGlitchさん、翻訳ありがとうございます。"
     },
-    
     "label": {
         "no_games": "ゲームが見つかりませんでした",
         "install": "インストール",
         "desc_install": "MODをインストールするには、@nadrinoさんが作成したSimpleModManager Homebrewアプリを使用する必要があります。",
         "extract": "展開が完了しました。 MODをインストールするには、インストールタブに移動してください。"
     },
-    
     "item": {
         "launch_smm": "SimpleModManagerを起動",
         "download_smm": "SimpleModManagerをダウンロード"
     },
-    
     "mods": {
         "mods_list_title": "MOD 一覧",
         "search": "検索",
@@ -57,5 +49,22 @@
         "images": "画像を表示",
         "browser": "ブラウザで開く",
         "author": "作者"
+    },
+    "games": {
+        "game_search": "Search game",
+        "game_sort": "Sort: {}",
+        "sort_recent": "Recent",
+        "sort_az": "A-Z",
+        "sort_installed": "With mods",
+        "installed_one": "1 mod installed",
+        "installed_many": "{} mods installed",
+        "played_now": "Played a moment ago",
+        "played_hours": "Played {} h ago",
+        "played_yesterday": "Played yesterday",
+        "played_days": "Played {} days ago",
+        "played_months": "Played {} months ago",
+        "no_match": "No game matches “{}”",
+        "clear_search": "Clear search",
+        "install_to": "Installs to"
     }
 }

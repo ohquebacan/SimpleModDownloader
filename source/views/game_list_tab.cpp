@@ -4,6 +4,8 @@
 #include "views/mods_list.hpp"
 
 #include <borealis.hpp>
+#include <algorithm>
+#include <cctype>
 
 using namespace brls::literals;
 
@@ -25,7 +27,22 @@ brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::In
     auto cell = (GameCell*)recycler->dequeueReusableCell("Cell");
     const auto& game = games[indexPath.row];
     cell->label->setText(game.name);
-    cell->subtitle->setText(fmt::format("TitleID : {}", game.tid));
+    /* OQB: lo util en vez del TitleID: cuantos mods tiene ya y cuando se jugo. */
+    std::string sub;
+    if (game.installedMods == 1) sub = "menu/games/installed_one"_i18n;
+    else if (game.installedMods > 1) sub = fmt::format(fmt::runtime("menu/games/installed_many"_i18n), game.installedMods);
+    std::string played;
+    if (game.playedKnown) {
+        const uint32_t m = game.minutesAgo, d = m / (60 * 24);
+        if (m < 60) played = "menu/games/played_now"_i18n;
+        else if (m < 60 * 24) played = fmt::format(fmt::runtime("menu/games/played_hours"_i18n), m / 60);
+        else if (d == 1) played = "menu/games/played_yesterday"_i18n;
+        else if (d < 60) played = fmt::format(fmt::runtime("menu/games/played_days"_i18n), d);
+        else played = fmt::format(fmt::runtime("menu/games/played_months"_i18n), d / 30);
+    }
+    if (!played.empty()) sub += (sub.empty() ? "" : "  ·  ") + played;
+    if (sub.empty()) sub = fmt::format("TitleID : {}", game.tid);
+    cell->subtitle->setText(sub);
     if (!game.icon.empty())
         cell->image->setImageFromMem(game.icon.data(), game.icon.size());
     return cell;
@@ -73,11 +90,31 @@ GameListTab::GameListTab() {
     recycler->estimatedRowHeight = 100;
     recycler->registerCell("Cell", []() { return GameCell::create(); });
 
+    this->registerAction("menu/games/game_search"_i18n, brls::ControllerButton::BUTTON_Y, [this](brls::View*) {
+        if (isLoading) return true;
+        brls::Application::getImeManager()->openForText([this](std::string text) {
+            this->filter = text;
+        }, "menu/games/game_search"_i18n, "", 40, this->filter);
+        this->applyView();
+        return true;
+    });
+    this->registerAction("", brls::ControllerButton::BUTTON_X, [this](brls::View*) {
+        if (isLoading) return true;
+        this->sortMode = (this->sortMode + 1) % 3;
+        this->applyView();
+        return true;
+    });
+    this->registerAction("menu/games/clear_search"_i18n, brls::ControllerButton::BUTTON_BACK, [this](brls::View*) {
+        if (this->filter.empty()) return true;
+        this->filter.clear();
+        this->applyView();
+        return true;
+    });
+    this->updateHints();
+
     if (s_cacheLoaded) {
-        delete gameData;
-        gameData = new GameData(s_cachedGames);
-        recycler->setDataSource(gameData, false);
         loading_box->setVisibility(brls::Visibility::GONE);
+        this->applyView();
         return;
     }
 
@@ -96,11 +133,10 @@ GameListTab::GameListTab() {
             isLoading = false;
             brls::Application::unblockInputs();
             s_cacheLoaded = true;
-            delete gameData;
-            gameData = newData;
-            recycler->setDataSource(gameData, false);
+            delete newData;
             loading_spinner->animate(false);
             loading_box->setVisibility(brls::Visibility::GONE);
+            this->applyView();
         });
     });
 
@@ -113,6 +149,55 @@ GameListTab::GameListTab() {
         }
     }
     #endif
+}
+
+namespace {
+    std::string lower(std::string s) {
+        for (auto& c : s) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        return s;
+    }
+}
+
+// OQB: la lista que se ve, filtrada por el buscador y en el orden elegido.
+void GameListTab::applyView() {
+    std::vector<utils::GameInfo> list;
+    const std::string f = lower(this->filter);
+    for (const auto& g : s_cachedGames)
+        if (f.empty() || lower(g.name).find(f) != std::string::npos) list.push_back(g);
+    auto byName = [](const utils::GameInfo& a, const utils::GameInfo& b) { return lower(a.name) < lower(b.name); };
+    if (this->sortMode == 1)
+        std::stable_sort(list.begin(), list.end(), byName);
+    else if (this->sortMode == 2)
+        std::stable_sort(list.begin(), list.end(), [&](const utils::GameInfo& a, const utils::GameInfo& b) {
+            if (a.installedMods != b.installedMods) return a.installedMods > b.installedMods;
+            return byName(a, b);
+        });
+    else
+        std::stable_sort(list.begin(), list.end(), [&](const utils::GameInfo& a, const utils::GameInfo& b) {
+            if (a.lastPlayed != b.lastPlayed) return a.lastPlayed > b.lastPlayed;
+            return byName(a, b);
+        });
+
+    if (list.empty() && !f.empty()) {
+        auto dialog = new brls::Dialog(fmt::format(fmt::runtime("menu/games/no_match"_i18n), this->filter));
+        dialog->addButton("hints/ok"_i18n, []() {});
+        dialog->open();
+        this->filter.clear();
+        this->applyView();
+        return;
+    }
+    auto* old = gameData;
+    gameData = new GameData(std::move(list));
+    recycler->setDataSource(gameData, false);
+    delete old;
+    this->updateHints();
+}
+
+void GameListTab::updateHints() {
+    const char* keys[] = {"menu/games/sort_recent", "menu/games/sort_az", "menu/games/sort_installed"};
+    this->updateActionHint(brls::ControllerButton::BUTTON_X, fmt::format(fmt::runtime("menu/games/game_sort"_i18n), brls::getStr(keys[this->sortMode])));
+    this->updateActionHint(brls::ControllerButton::BUTTON_Y, this->filter.empty() ? "menu/games/game_search"_i18n : "menu/games/game_search"_i18n + ": " + this->filter);
+    this->updateActionHint(brls::ControllerButton::BUTTON_BACK, this->filter.empty() ? "" : "menu/games/clear_search"_i18n);
 }
 
 brls::View* GameListTab::create() {

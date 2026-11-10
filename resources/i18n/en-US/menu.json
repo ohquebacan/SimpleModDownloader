@@ -82,5 +82,22 @@
     },
     "crash": {
         "sd_full": "The SD card is full. Please free up space and restart the application."
+    },
+    "games": {
+        "game_search": "Search game",
+        "game_sort": "Sort: {}",
+        "sort_recent": "Recent",
+        "sort_az": "A-Z",
+        "sort_installed": "With mods",
+        "installed_one": "1 mod installed",
+        "installed_many": "{} mods installed",
+        "played_now": "Played a moment ago",
+        "played_hours": "Played {} h ago",
+        "played_yesterday": "Played yesterday",
+        "played_days": "Played {} days ago",
+        "played_months": "Played {} months ago",
+        "no_match": "No game matches “{}”",
+        "clear_search": "Clear search",
+        "install_to": "Installs to"
     }
 }

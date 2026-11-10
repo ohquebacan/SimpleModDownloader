@@ -50,5 +50,22 @@
         "images": "Ver imágenes",
         "browser": "Abrir en el navegador",
         "author": "Autor"
+    },
+    "games": {
+        "game_search": "Buscar juego",
+        "game_sort": "Ordenar: {}",
+        "sort_recent": "Recientes",
+        "sort_az": "A-Z",
+        "sort_installed": "Con mods",
+        "installed_one": "1 mod instalado",
+        "installed_many": "{} mods instalados",
+        "played_now": "Jugado hace un rato",
+        "played_hours": "Jugado hace {} h",
+        "played_yesterday": "Jugado ayer",
+        "played_days": "Jugado hace {} días",
+        "played_months": "Jugado hace {} meses",
+        "no_match": "Ningún juego coincide con «{}»",
+        "clear_search": "Quitar búsqueda",
+        "install_to": "Se instala en"
     }
 }
