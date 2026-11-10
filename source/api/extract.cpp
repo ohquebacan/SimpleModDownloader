@@ -1,3 +1,4 @@
+#include <cctype>
 #include "api/extract.hpp"
 #include "utils/progress_event.hpp"
 
@@ -51,6 +52,27 @@ namespace extract {
         return totalSize;
     }
 
+    /* OQB: la carpeta del mod (romfs/, exefs/, exefs_patches/) se busca sin
+       distinguir mayusculas: muchos mods traen "Romfs" o "RomFS" y antes salian
+       como no compatibles. Devuelve la posicion en la ruta y la carpeta tal como
+       debe quedar en la SD (en minusculas, que es como la lee Atmosphere). */
+    static size_t findModFolder(const std::string& path, std::string& folder) {
+        std::string low = path;
+        for (auto& c : low) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        // exefs_patches antes que exefs; cada uno debe empezar una carpeta.
+        for (const char* f : {"exefs_patches/", "romfs/", "exefs/"}) {
+            size_t pos = 0;
+            while ((pos = low.find(f, pos)) != std::string::npos) {
+                if (pos == 0 || low[pos - 1] == '/') {
+                    folder = f;
+                    return pos;
+                }
+                pos++;
+            }
+        }
+        return std::string::npos;
+    }
+
     bool hasSupportedContents(const std::string& archivePath, const std::string& tid) {
         /* Los mods de Smash van tal cual a sdmc:/ultimate/mods, no se filtran. */
         if (tid == smash_tid)
@@ -73,9 +95,8 @@ namespace extract {
         bool supported = false;
         while (archive_read_next_header(archive, &entry) == ARCHIVE_OK) {
             const std::string name = archive_entry_pathname(entry);
-            if (name.find("romfs/") != std::string::npos ||
-                name.find("exefs/") != std::string::npos ||
-                name.find("exefs_patches/") != std::string::npos) {
+            std::string folder;
+            if (findModFolder(name, folder) != std::string::npos) {
                 brls::Logger::debug("Contenido instalable encontrado: {}", name);
                 supported = true;
                 break;
@@ -133,17 +154,18 @@ bool extractEntry(const std::string& archiveFile, const std::string& outputDir, 
             const char* entryName = archive_entry_pathname(entry);
             
             if ((tid != smash_tid)) {
-                if (std::string(entryName).find("romfs/") != std::string::npos || std::string(entryName).find("exefs/") != std::string::npos || std::string(entryName).find("exefs_patches/") != std::string::npos) {
-                    
+                std::string folder;
+                const std::string entryStr = entryName;
+                const size_t at = findModFolder(entryStr, folder);
+                if (at != std::string::npos) {
+
+                    // La carpeta del mod en minusculas, aunque el zip la traiga como "Romfs".
+                    const std::string rest = folder + entryStr.substr(at + folder.size());
                     std::string outputFilePath;
-
-
-                    if (std::string(entryName).find("romfs/") != std::string::npos) //romfs
-                        outputFilePath = fmt::format("{}/contents/{}/{}", outputDir, tid, std::string(entryName).substr(std::string(entryName).find("romfs/")));
-                    else if (std::string(entryName).find("exefs_patches/") != std::string::npos)//exefs_patches
-                        outputFilePath = fmt::format("{}/{}", outputDir, std::string(entryName).substr(std::string(entryName).find("exefs_patches/")));
-                    else //Exefs
-                        outputFilePath = fmt::format("{}/contents/{}/{}", outputDir, tid, std::string(entryName).substr(std::string(entryName).find("exefs/")));
+                    if (folder == "exefs_patches/")
+                        outputFilePath = fmt::format("{}/{}", outputDir, rest);
+                    else
+                        outputFilePath = fmt::format("{}/contents/{}/{}", outputDir, tid, rest);
 
                     if (std::string(entryName).find("|") != std::string::npos)
                         outputFilePath = outputFilePath.substr(0, outputFilePath.find("|"));

@@ -1,3 +1,4 @@
+#include <cctype>
 #include "api/mod.hpp"
 #include "api/net.hpp"
 #include "utils/utils.hpp"
@@ -86,7 +87,10 @@ File::File(const std::string &name, const int &size, const std::string &url, con
 
 bool File::findRomfsRecursive(const nlohmann::json& obj) {
     for (const auto& item : obj.items()) {
-        if (item.key() == "romfs" || item.key() == "exefs" || item.key() == "exefs_patches"){
+        std::string key = item.key();
+        for (auto& c : key) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        // OQB: sin distinguir mayusculas ("Romfs", "RomFS").
+        if (key == "romfs" || key == "exefs" || key == "exefs_patches"){
             brls::Logger::debug("found romfs");
             return true;
         }
