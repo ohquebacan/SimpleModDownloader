@@ -38,3 +38,32 @@ inline void fillHintBar(brls::Box* bar, const std::vector<std::pair<std::string,
         bar->addView(item);
     }
 }
+
+#include <filesystem>
+#include <switch.h>
+
+/* OQB: boton + "Instalar mods": los mods se activan en SimpleModManager. Pregunta
+   y, si se acepta, lo abre (al salir de esta app, hbloader carga ese .nro). */
+inline void openModManagerDialog()
+{
+    using namespace brls::literals;
+    const char* paths[] = {"sdmc:/switch/SimpleModManager.nro", "sdmc:/switch/SimpleModManager/SimpleModManager.nro"};
+    std::string found;
+    std::error_code ec;
+    for (const char* p : paths)
+        if (std::filesystem::exists(p, ec)) { found = p; break; }
+    if (found.empty()) {
+        auto* d = new brls::Dialog("menu/games/smm_missing"_i18n);
+        d->addButton("hints/ok"_i18n, []() {});
+        d->open();
+        return;
+    }
+    auto* d = new brls::Dialog("menu/games/smm_text"_i18n);
+    d->addButton("menu/games/smm_cancel"_i18n, []() {});
+    d->addButton("menu/games/smm_open"_i18n, [found]() {
+        const std::string arg = "\"" + found + "\"";
+        envSetNextLoad(found.c_str(), arg.c_str());
+        brls::Application::quit();
+    });
+    d->open();
+}

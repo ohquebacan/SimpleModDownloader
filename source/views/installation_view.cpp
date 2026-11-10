@@ -62,7 +62,7 @@ void InstallationView::downloadSmm() {
     {
         std::unique_lock<std::mutex> lock(threadMutex);
     }
-    const std::string SimpleModManager_URL = "https://github.com/nadrino/SimpleModManager/releases/latest/download/SimpleModManager.nro";
+    const std::string SimpleModManager_URL = "https://github.com/ohquebacan/SimpleModManager-OQB/releases/latest/download/SimpleModManager.nro";
     net::downloadFile(SimpleModManager_URL, "sdmc:/switch/SimpleModManager.nro");
     downloadFinished = true;
 }

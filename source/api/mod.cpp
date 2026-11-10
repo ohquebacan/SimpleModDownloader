@@ -146,8 +146,15 @@ void ModList::updatePage() {
     nlohmann::json mod_json;
     
 
+    // OQB: con orden elegido se usa Mod/Index, que acepta _sSort (comprobado en la API).
+    static const char* SORTS[] = {"", "Generic_MostLiked", "Generic_MostDownloaded", "Generic_Newest"};
+    const std::string sort = (sortMode > 0 && sortMode < 4) ? fmt::format("&_sSort={}", SORTS[sortMode]) : "";
+
     if (currentCategory.getName() != "") {
-        mod_json = net::downloadRequest(fmt::format("https://gamebanana.com/apiv11/Mod/Index?_nPerpage=15&_aFilters[Generic_Category]={}&_nPage={}", currentCategory.getID(), currentPage));
+        mod_json = net::downloadRequest(fmt::format("https://gamebanana.com/apiv11/Mod/Index?_nPerpage=15&_aFilters[Generic_Category]={}&_nPage={}{}", currentCategory.getID(), currentPage, sort));
+    }
+    else if (currentSearch == "" && !sort.empty()) {
+        mod_json = net::downloadRequest(fmt::format("https://gamebanana.com/apiv11/Mod/Index?_nPerpage=15&_aFilters[Generic_Game]={}&_nPage={}{}", game.getGamebananaID(), currentPage, sort));
     }
     else if(currentSearch == "") {
         mod_json = net::downloadRequest(fmt::format("https://gamebanana.com/apiv11/Game/{}/Subfeed?_nPage={}?_nPerpage=50&_csvModelInclusions=Mod", game.getGamebananaID(), currentPage));
@@ -187,6 +194,12 @@ void ModList::updatePage() {
 
         mods.push_back(newMod);
     }
+}
+
+void ModList::setSort(int sort) {
+    sortMode = sort;
+    currentPage = 1;
+    updatePage();
 }
 
 void ModList::nextPage() {

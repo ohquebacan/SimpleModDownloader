@@ -117,6 +117,10 @@ GameListTab::GameListTab() {
         this->applyView(true);
         return true;
     }, true);
+    this->registerAction("menu/games/h_install"_i18n, brls::ControllerButton::BUTTON_START, [](brls::View*) {
+        openModManagerDialog();
+        return true;
+    }, true);
     this->registerAction("menu/games/more"_i18n, brls::ControllerButton::BUTTON_RB, [](brls::View*) {
         brls::Application::pushActivity(new MoreActivity());
         return true;
@@ -317,6 +321,7 @@ void GameListTab::updateHints() {
     fillHintBar(hintBar, {{"A", "menu/games/h_open"_i18n},
                           {"Y", "menu/games/h_search"_i18n},
                           {"X", "menu/games/h_sort"_i18n},
+                          {"+", "menu/games/h_install"_i18n},
                           {"R", "menu/games/h_more"_i18n},
                           {"−", this->filter.empty() ? "" : "menu/games/h_clear"_i18n},
                           {"B", "menu/games/h_exit"_i18n}});

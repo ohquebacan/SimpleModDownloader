@@ -17,6 +17,12 @@ private:
     File file;
 
     BRLS_BIND(brls::Label, download_text, "download_text");
+    BRLS_BIND(brls::Label, dl_title, "dl_title");
+    BRLS_BIND(brls::Label, dl_step1, "dl_step1");
+    BRLS_BIND(brls::Label, dl_step2, "dl_step2");
+    BRLS_BIND(brls::Label, dl_note, "dl_note");
+    BRLS_BIND(brls::Box, dl_card1, "dl_card1");
+    BRLS_BIND(brls::Box, dl_card2, "dl_card2");
     BRLS_BIND(brls::ProgressSpinner, download_spinner, "download_spinner");
     BRLS_BIND(brls::Label, download_percent, "download_percent");
     BRLS_BIND(brls::Slider, download_progressBar, "download_progressBar");

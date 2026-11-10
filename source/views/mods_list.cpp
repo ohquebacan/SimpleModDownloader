@@ -124,6 +124,10 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
         return true;
     }, true);
 
+    this->registerAction("menu/games/h_install"_i18n, brls::ControllerButton::BUTTON_START, [](brls::View*) {
+        openModManagerDialog();
+        return true;
+    }, true);
     headSearchBox->setFocusable(true);
     headSearchBox->setHighlightCornerRadius(10);
     headSearchBox->registerClickAction([this](brls::View*) {
@@ -131,12 +135,6 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
         return true;
     });
     headSearchBox->addGestureRecognizer(new brls::TapGestureRecognizer(headSearchBox));
-    fillHintBar(hintBar, {{"A", "menu/games/h_view"_i18n},
-                          {"Y", "menu/games/h_search"_i18n},
-                          {"X", "menu/games/h_categories"_i18n},
-                          {"L R", "menu/games/h_page"_i18n},
-                          {"B", "menu/games/h_back"_i18n}});
-
     this->buildChips();
     this->buildGrid(false);
 }
@@ -207,18 +205,46 @@ void ModListTab::updateHeader() {
     headTitle->setText(fmt::format("{} {}", "menu/mods/mods_for"_i18n, gameCopy.getTitle()));
     headSearchBox->setCornerRadius(10);
     headSearchBox->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
-    headSearch->setText(this->lastSearch.empty() ? "menu/mods/search"_i18n + " (Y)" : fmt::format("{}: {}", "menu/mods/search"_i18n, this->lastSearch));
+    headSearch->setText(this->lastSearch.empty() ? "menu/mods/search"_i18n : fmt::format("{}: {}", "menu/mods/search"_i18n, this->lastSearch));
     headSearch->setTextColor(this->lastSearch.empty() ? nvgRGB(140, 140, 140) : nvgRGB(230, 230, 230));
-    headChips->clearViews();
-    auto* chip = new brls::Box(brls::Axis::ROW);
-    chip->setCornerRadius(16);
-    chip->setPadding(6, 14, 6, 14);
-    chip->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
-    auto* l = new brls::Label();
-    l->setText(fmt::format(fmt::runtime("menu/games/page"_i18n), this->page));
-    l->setFontSize(15);
-    chip->addView(l);
-    headChips->addView(chip);
+
+    /* Orden de los mods (Mod/Index de GameBanana con _sSort). Los chips se
+       crean una vez; despues solo cambia el color. */
+    if (sortChips.empty()) {
+        const char* keys[] = {"menu/games/s_popular", "menu/games/s_liked", "menu/games/s_downloaded", "menu/games/s_new"};
+        for (int i = 0; i < 4; ++i) {
+            auto* chip = new brls::Box(brls::Axis::ROW);
+            chip->setCornerRadius(10);
+            chip->setHighlightCornerRadius(10);
+            chip->setPadding(8, 14, 8, 14);
+            chip->setMarginLeft(8);
+            chip->setFocusable(true);
+            auto* l = new brls::Label();
+            l->setText(brls::getStr(keys[i]));
+            l->setFontSize(15);
+            l->setSingleLine(true);
+            chip->addView(l);
+            chip->registerClickAction([this, i](brls::View*) {
+                this->modData->getModList()->setSort(i);
+                this->page = 1;
+                this->buildGrid(false);
+                return true;
+            });
+            chip->addGestureRecognizer(new brls::TapGestureRecognizer(chip));
+            headChips->addView(chip);
+            sortChips.push_back(chip);
+        }
+    }
+    const int sort = this->modData->getModList()->getSort();
+    for (int i = 0; i < (int)sortChips.size(); ++i)
+        sortChips[i]->setBackgroundColor(i == sort ? nvgRGBA(0, 160, 230, 80) : nvgRGBA(128, 128, 128, 34));
+
+    fillHintBar(hintBar, {{"A", "menu/games/h_view"_i18n},
+                          {"Y", "menu/games/h_search"_i18n},
+                          {"X", "menu/games/h_categories"_i18n},
+                          {"L R", fmt::format(fmt::runtime("menu/games/h_page_n"_i18n), this->page)},
+                          {"+", "menu/games/h_install"_i18n},
+                          {"B", "menu/games/h_back"_i18n}});
 }
 
 void ModListTab::buildGrid(bool focus) {

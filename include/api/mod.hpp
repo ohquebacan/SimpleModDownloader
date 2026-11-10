@@ -94,7 +94,12 @@ class ModList {
         void setCategory(const Category& category);
 
         Category getCategory() {return currentCategory;}
+        // OQB: orden de la lista. 0 lo de GameBanana (recientes en su portada),
+        // 1 mas gustados, 2 mas descargados, 3 mas nuevos.
+        void setSort(int sort);
+        int getSort() const { return sortMode; }
     private:
+        int sortMode = 0;
         void updatePage();
         
         std::vector<Mod> mods;

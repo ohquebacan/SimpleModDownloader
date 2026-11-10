@@ -72,6 +72,7 @@ private:
     BRLS_BIND(brls::Box, headChips, "mhead_chips_top");
     BRLS_BIND(brls::Box, hintBar, "mod_hint_bar");
     std::vector<brls::Box*> catChips;
+    std::vector<brls::Box*> sortChips;
     void doSearch();
     std::string lastSearch;
     int page = 1;

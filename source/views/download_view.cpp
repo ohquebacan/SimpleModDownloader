@@ -24,13 +24,31 @@ DownloadView::DownloadView(File& file): file(file) {
     download_percent->setText(fmt::format("{}%", 0));
     extract_percent->setText(fmt::format("{}%", 0));
 
-    download_text->setText(fmt::format("{} : {}", "menu/title/downloading"_i18n, file.getName()));
-    
-    std::regex badChars("[:/|*]");
-    if (file.getGame().getTid() != "01006A800016E000")
-        extract_text->setText(fmt::format("{} {} {} {}", "menu/title/extracting"_i18n, file.getName(), "menu/mods/to"_i18n, fmt::format("sdmc:/{}/{}/{}/contents/{}/romfs", utils::getModInstallPath(), std::regex_replace(this->file.getGame().getTitle(), badChars, "-"), std::regex_replace(this->file.getModName(), badChars, "-"), std::regex_replace(this->file.getGame().getTid(), badChars, "-")), this->file.getGame().getTid()));
-    else    
-        extract_text->setText(fmt::format("{} {} {} {}", "menu/title/extracting"_i18n, file.getName(), "menu/mods/to"_i18n, fmt::format("sdmc:/ultimate/mods/{}", file.getModName())));
+    /* OQB: misma linea visual que el resto: titulo, el archivo y dos tarjetas
+       (descarga e instalacion) con su progreso. */
+    dl_title->setText("menu/games/dl_title"_i18n);
+    download_text->setText(file.getName());
+    download_text->setTextColor(nvgRGB(140, 140, 140));
+    dl_step1->setText("menu/games/dl_step1"_i18n);
+    dl_step2->setText("menu/games/dl_step2"_i18n);
+    for (auto* card : {dl_card1.getView(), dl_card2.getView()}) {
+        card->setCornerRadius(12);
+        card->setBackgroundColor(nvgRGBA(128, 128, 128, 30));
+    }
+    dl_note->setText("menu/games/dl_note"_i18n);
+    dl_note->setTextColor(nvgRGB(140, 140, 140));
+
+    std::regex badChars("[:/\\<>|*]");
+    std::string destino;
+    if (file.getGame().getTid() != "01006A800016E000") {
+        std::string folder = utils::modFolderFor(this->file.getGame().getTitle());
+        if (folder.rfind("sdmc:", 0) == 0) folder = folder.substr(5);
+        destino = fmt::format("{}/{}", folder, std::regex_replace(this->file.getModName(), badChars, "-"));
+    }
+    else
+        destino = fmt::format("/ultimate/mods/{}", file.getModName());
+    extract_text->setText(fmt::format("{} {}", "menu/games/install_to"_i18n, destino));
+    extract_text->setTextColor(nvgRGB(140, 140, 140));
 
     this->setActionAvailable(brls::ControllerButton::BUTTON_B, false);
 
@@ -149,6 +167,7 @@ void DownloadView::updateProgress() {
         getAppletFrame()->setHeaderVisibility(brls::Visibility::GONE);
         getAppletFrame()->setActionAvailable(brls::ControllerButton::BUTTON_B, true);
         this->dismiss();
+        if (!unsupported) brls::Application::notify("menu/games/dl_done"_i18n);
         if (unsupported) {
             auto dialog = new brls::Dialog("menu/notify/mod_unsupported"_i18n);
             dialog->addButton("hints/ok"_i18n, []() {});

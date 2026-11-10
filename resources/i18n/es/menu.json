@@ -96,6 +96,21 @@
         "h_choose": "Elegir",
         "h_search": "Buscar",
         "h_clear": "Quitar búsqueda",
-        "h_view": "Ver mod"
+        "h_view": "Ver mod",
+        "s_popular": "Populares",
+        "s_liked": "Más gustados",
+        "s_downloaded": "Más descargados",
+        "s_new": "Nuevos",
+        "h_page_n": "Página {}",
+        "h_install": "Instalar mods",
+        "smm_text": "Los mods que bajaste se activan y se apagan en SimpleModManager. ¿Abrirlo ahora?",
+        "smm_open": "Abrir SimpleModManager",
+        "smm_cancel": "Ahora no",
+        "smm_missing": "SimpleModManager no está instalado. Instálalo desde OQB Updater, en Apps o Bacán Shop.",
+        "dl_title": "Descargando e instalando",
+        "dl_step1": "1. Descarga",
+        "dl_step2": "2. Instalación",
+        "dl_note": "Al terminar vuelves a la página del mod. Después actívalo en SimpleModManager (+).",
+        "dl_done": "Mod instalado. Actívalo en SimpleModManager."
     }
 }

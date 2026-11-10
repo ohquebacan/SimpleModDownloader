@@ -1,76 +1,126 @@
 <brls:Box
     width="auto"
     height="auto"
+    axis="column"
     justifyContent="center"
-    margin="20"
-    axis="column">
-        
+    paddingTop="30"
+    paddingLeft="80"
+    paddingRight="80">
 
     <brls:Label
+        id="dl_title"
         width="auto"
-        height="50"
+        height="auto"
+        fontSize="30"/>
+
+    <brls:Label
         id="download_text"
-        margin="10"/>
-
-    <brls:Box
         width="auto"
         height="auto"
-        justifyContent="center"
-        margin="4"
-        axis="row">
-        <brls:ProgressSpinner
-            width="30"
-            height="30"
-            id="download_spinner"
-            margin="10"
-            size="normal"/>
+        fontSize="18"
+        marginTop="6"
+        marginBottom="24"/>
 
-        <brls:Slider
-            width="80%"
-            height="40"
-            id="download_progressBar"
-            margin="10"/>
+    <brls:Box
+        id="dl_card1"
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingTop="18"
+        paddingBottom="14"
+        paddingLeft="22"
+        paddingRight="22"
+        marginBottom="16">
 
         <brls:Label
+            id="dl_step1"
             width="auto"
-            height="30"
-            id="download_percent"
-            margin="10"/>
+            height="auto"
+            fontSize="18"/>
 
+        <brls:Box
+            width="auto"
+            height="auto"
+            axis="row"
+            alignItems="center"
+            marginTop="8">
+            <brls:ProgressSpinner
+                width="30"
+                height="30"
+                id="download_spinner"
+                marginRight="10"
+                size="normal"/>
+
+            <brls:Slider
+                width="80%"
+                height="40"
+                id="download_progressBar"/>
+
+            <brls:Label
+                width="auto"
+                height="30"
+                id="download_percent"
+                marginLeft="10"/>
+        </brls:Box>
     </brls:Box>
 
+    <brls:Box
+        id="dl_card2"
+        width="auto"
+        height="auto"
+        axis="column"
+        paddingTop="18"
+        paddingBottom="14"
+        paddingLeft="22"
+        paddingRight="22"
+        marginBottom="16">
+
+        <brls:Label
+            id="dl_step2"
+            width="auto"
+            height="auto"
+            fontSize="18"/>
+
+        <brls:Label
+            id="extract_text"
+            width="auto"
+            height="auto"
+            fontSize="14"
+            singleLine="false"
+            marginTop="4"/>
+
+        <brls:Box
+            width="auto"
+            height="auto"
+            axis="row"
+            alignItems="center"
+            marginTop="8">
+            <brls:ProgressSpinner
+                width="30"
+                height="30"
+                id="extract_spinner"
+                marginRight="10"
+                size="normal"/>
+
+            <brls:Slider
+                width="80%"
+                height="40"
+                id="extract_progressBar"/>
+
+            <brls:Label
+                width="auto"
+                height="30"
+                id="extract_percent"
+                marginLeft="10"/>
+        </brls:Box>
+    </brls:Box>
 
     <brls:Label
-        width="auto"
-        height="50"
-        id="extract_text"
-        margin="10"/>
-
-    <brls:Box
+        id="dl_note"
         width="auto"
         height="auto"
-        justifyContent="center"
-        margin="20"
-        axis="row">
-        <brls:ProgressSpinner
-            width="30"
-            height="30"
-            id="extract_spinner"
-            margin="10"
-            size="normal"/>
-
-        <brls:Slider
-            width="80%"
-            height="40"
-            id="extract_progressBar"
-            margin="10"/>
-
-        <brls:Label
-            width="auto"
-            height="30"
-            id="extract_percent"
-            margin="10"/>
-
-    </brls:Box>
+        fontSize="15"
+        singleLine="false"
+        marginTop="6"/>
 
 </brls:Box>
