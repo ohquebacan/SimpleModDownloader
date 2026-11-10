@@ -28,6 +28,7 @@ private:
     BRLS_BIND(brls::Box, stats_box, "stats_box");
     BRLS_BIND(brls::Label, files_title, "files_title");
     BRLS_BIND(brls::Label, install_path, "install_path");
+    BRLS_BIND(brls::Box, hint_bar, "prev_hint_bar");
     BRLS_BIND(brls::Label, author, "author");
     BRLS_BIND(brls::Label, description, "description");
     BRLS_BIND(brls::ScrollingFrame, scrolling, "mod_preview_scrolling");

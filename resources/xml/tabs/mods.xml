@@ -79,4 +79,16 @@
 
     </brls:ScrollingFrame>
 
+
+    <brls:Box
+        id="mod_hint_bar"
+        width="auto"
+        height="auto"
+        axis="row"
+        alignItems="center"
+        paddingTop="12"
+        paddingBottom="16"
+        paddingLeft="40"
+        paddingRight="40"/>
+
 </brls:Box>

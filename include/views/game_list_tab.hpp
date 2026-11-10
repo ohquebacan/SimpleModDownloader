@@ -47,6 +47,9 @@ private:
     BRLS_BIND(brls::Box, headSearchBox, "head_search_box");
     BRLS_BIND(brls::Label, headSearch, "head_search_label");
     BRLS_BIND(brls::Box, headChips, "head_chips_top");
+    BRLS_BIND(brls::Box, hintBar, "hint_bar");
+    std::vector<brls::Box*> sortChips;
+    void openSearch();
     BRLS_BIND(brls::Box, grid, "grid");
     BRLS_BIND(brls::Box, loading_box, "loading_box");
     BRLS_BIND(brls::Label, loading_label, "loading_label");

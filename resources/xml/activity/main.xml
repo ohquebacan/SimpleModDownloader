@@ -2,7 +2,7 @@
     id="applet"
     iconInterpolation="linear"
     headerHidden="true"
-    footerHidden="false">
+    footerHidden="true">
 
     <GameListTab/>
 

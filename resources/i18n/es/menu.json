@@ -85,6 +85,17 @@
         "not_installed": "Sin instalar",
         "header": "Descargar mods",
         "more": "Más opciones",
-        "page": "Página {}"
+        "page": "Página {}",
+        "h_open": "Ver mods",
+        "h_sort": "Ordenar",
+        "h_more": "Más opciones",
+        "h_exit": "Salir",
+        "h_back": "Volver",
+        "h_page": "Página",
+        "h_categories": "Categorías",
+        "h_choose": "Elegir",
+        "h_search": "Buscar",
+        "h_clear": "Quitar búsqueda",
+        "h_view": "Ver mod"
     }
 }

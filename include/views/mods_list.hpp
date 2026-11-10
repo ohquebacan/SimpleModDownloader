@@ -70,6 +70,9 @@ private:
     BRLS_BIND(brls::Box, headSearchBox, "mhead_search_box");
     BRLS_BIND(brls::Label, headSearch, "mhead_search_label");
     BRLS_BIND(brls::Box, headChips, "mhead_chips_top");
+    BRLS_BIND(brls::Box, hintBar, "mod_hint_bar");
+    std::vector<brls::Box*> catChips;
+    void doSearch();
     std::string lastSearch;
     int page = 1;
     void updateHeader();

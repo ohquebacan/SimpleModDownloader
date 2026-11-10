@@ -103,6 +103,17 @@
         "not_installed": "Not installed",
         "header": "Download mods",
         "more": "More",
-        "page": "Page {}"
+        "page": "Page {}",
+        "h_open": "Open",
+        "h_sort": "Sort",
+        "h_more": "More",
+        "h_exit": "Exit",
+        "h_back": "Back",
+        "h_page": "Page",
+        "h_categories": "Categories",
+        "h_choose": "Select",
+        "h_search": "Search",
+        "h_clear": "Clear search",
+        "h_view": "View mod"
     }
 }

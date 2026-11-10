@@ -1,4 +1,5 @@
 #include "views/mod_preview.hpp"
+#include "views/hint_bar.hpp"
 #include "views/download_view.hpp"
 #include "views/spinner_image_view.hpp"
 #include "utils/utils.hpp"
@@ -59,6 +60,7 @@ ModPreview::ModPreview(Mod& mod, std::vector<unsigned char>& bannerBuffer): mod(
         install_path->setText(fmt::format("{} {}/{}", "menu/games/install_to"_i18n, folder, std::regex_replace(this->mod.getName(), badChars, "-")));
         install_path->setTextColor(nvgRGB(140, 140, 140));
     }
+    fillHintBar(hint_bar, {{"A", "menu/games/h_choose"_i18n}, {"B", "menu/games/h_back"_i18n}});
     files_title->setText("menu/mods/files"_i18n);
     files_title->setTextColor(nvgRGB(140, 140, 140));
     {

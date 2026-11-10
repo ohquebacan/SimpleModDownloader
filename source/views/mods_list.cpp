@@ -1,5 +1,6 @@
 #include "views/mods_list.hpp"
 #include "views/mod_preview.hpp"
+#include "views/hint_bar.hpp"
 #include "utils/utils.hpp"
 #include "api/net.hpp"
 #include "utils/config.hpp"
@@ -104,22 +105,9 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
     });
 
     this->registerAction("menu/mods/search"_i18n, brls::ControllerButton::BUTTON_Y, [this](brls::View* view) {
-        std::string search;
-        brls::Application::getImeManager()->openForText([&](std::string text){
-            search = text;
-        });
-        if(search.size() < 3) {
-            auto dialog = new brls::Dialog("menu/notify/string_to_short"_i18n);
-            dialog->addButton("hints/ok"_i18n, []() {});
-            dialog->open();
-            return true;
-        }
-        this->modData->getModList()->search(search);
-        this->lastSearch = search;
-        this->page = 1;
-        this->buildGrid(true);
+        this->doSearch();
         return true;
-    });
+    }, true);
 
     this->registerAction("menu/mods/categories"_i18n, brls::ControllerButton::BUTTON_X, [this](brls::View* view) {
         int selected = this->modData->getModList()->getCategory().getIndex();
@@ -134,10 +122,41 @@ ModListTab::ModListTab(Game& game) : gameCopy(game) {
         }, selected);
         brls::Application::pushActivity(new brls::Activity(selector));
         return true;
+    }, true);
+
+    headSearchBox->setFocusable(true);
+    headSearchBox->setHighlightCornerRadius(10);
+    headSearchBox->registerClickAction([this](brls::View*) {
+        this->doSearch();
+        return true;
     });
+    headSearchBox->addGestureRecognizer(new brls::TapGestureRecognizer(headSearchBox));
+    fillHintBar(hintBar, {{"A", "menu/games/h_view"_i18n},
+                          {"Y", "menu/games/h_search"_i18n},
+                          {"X", "menu/games/h_categories"_i18n},
+                          {"L R", "menu/games/h_page"_i18n},
+                          {"B", "menu/games/h_back"_i18n}});
 
     this->buildChips();
     this->buildGrid(false);
+}
+
+void ModListTab::doSearch() {
+    std::string search;
+    brls::Application::getImeManager()->openForText([&](std::string text){
+        search = text;
+    });
+    if (search.empty()) return;
+    if (search.size() < 3) {
+        auto dialog = new brls::Dialog("menu/notify/string_to_short"_i18n);
+        dialog->addButton("hints/ok"_i18n, []() {});
+        dialog->open();
+        return;
+    }
+    this->modData->getModList()->search(search);
+    this->lastSearch = search;
+    this->page = 1;
+    this->buildGrid(true);
 }
 
 ModListTab::~ModListTab() {
@@ -151,32 +170,37 @@ void ModListTab::stopThumbs() {
 
 // Las categorias del juego como chips (las primeras 6; X abre la lista completa).
 void ModListTab::buildChips() {
-    chips->clearViews();
     auto cats = gameCopy.getCategories();
     const int current = this->modData->getModList()->getCategory().getIndex();
-    const int shown = std::min<int>(cats.size(), 6);
-    for (int i = 0; i < shown; ++i) {
-        auto* chip = new brls::Box(brls::Axis::ROW);
-        chip->setFocusable(true);
-        chip->setHighlightCornerRadius(16);
-        chip->setCornerRadius(16);
-        chip->setPadding(6, 14, 6, 14);
-        chip->setMarginRight(8);
-        if (i == current) chip->setBackgroundColor(nvgRGBA(0, 160, 230, 60));
-        auto* label = new brls::Label();
-        label->setText(cats[i].getName());
-        label->setFontSize(15);
-        label->setSingleLine(true);
-        chip->addView(label);
-        chip->registerClickAction([this, i](brls::View*) {
-            this->modData->getModList()->setCategory(gameCopy.getCategories()[i]);
-            this->buildChips();
-            this->buildGrid(true);
-            return true;
-        });
-        chip->addGestureRecognizer(new brls::TapGestureRecognizer(chip));
-        chips->addView(chip);
+    // Se crean una vez; despues solo cambia el color (borrar el chip con foco deja a borealis sin foco).
+    if (catChips.empty()) {
+        const int shown = std::min<int>(cats.size(), 6);
+        for (int i = 0; i < shown; ++i) {
+            auto* chip = new brls::Box(brls::Axis::ROW);
+            chip->setFocusable(true);
+            chip->setHighlightCornerRadius(10);
+            chip->setCornerRadius(10);
+            chip->setPadding(8, 16, 8, 16);
+            chip->setMarginRight(8);
+            auto* label = new brls::Label();
+            label->setText(cats[i].getName());
+            label->setFontSize(16);
+            label->setSingleLine(true);
+            chip->addView(label);
+            chip->registerClickAction([this, i](brls::View*) {
+                this->modData->getModList()->setCategory(gameCopy.getCategories()[i]);
+                this->page = 1;
+                this->buildChips();
+                this->buildGrid(false);
+                return true;
+            });
+            chip->addGestureRecognizer(new brls::TapGestureRecognizer(chip));
+            chips->addView(chip);
+            catChips.push_back(chip);
+        }
     }
+    for (int i = 0; i < (int)catChips.size(); ++i)
+        catChips[i]->setBackgroundColor(i == current ? nvgRGBA(0, 160, 230, 80) : nvgRGBA(128, 128, 128, 34));
 }
 
 void ModListTab::updateHeader() {
