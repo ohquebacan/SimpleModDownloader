@@ -252,6 +252,21 @@ void GameListTab::applyView(bool focus) {
         if (!first) first = tile;
     }
     this->shown = std::move(list);
+
+    /* Los iconos se ponen por tandas, unos pocos por cuadro: decodificar los
+       100 de golpe congelaba la pantalla al abrir. */
+    std::vector<std::pair<brls::Image*, size_t>> pending;
+    {
+        size_t idx = 0;
+        for (auto* r : grid->getChildren())
+            for (auto* t : static_cast<brls::Box*>(r)->getChildren()) {
+                auto* img = static_cast<brls::Image*>(static_cast<brls::Box*>(t)->getChildren()[0]);
+                if (idx < this->shown.size() && !this->shown[idx].icon.empty()) pending.emplace_back(img, idx);
+                idx++;
+            }
+    }
+    const int gen = ++(*tileGen);
+    this->loadTileImages(std::move(pending), 0, gen);
     gridScroll->setContentOffsetY(0, false);
     if (focus && first) brls::Application::giveFocus(first);
     this->updateHints();
@@ -271,7 +286,6 @@ brls::View* GameListTab::makeTile(const utils::GameInfo& game) {
     image->setHeight(W - 12);
     image->setCornerRadius(10);
     image->setScalingType(brls::ImageScalingType::FILL);
-    if (!game.icon.empty()) image->setImageFromMem(game.icon.data(), game.icon.size());
     tile->addView(image);
 
     auto* name = new brls::Label();
@@ -299,6 +313,21 @@ brls::View* GameListTab::makeTile(const utils::GameInfo& game) {
     });
     tile->addGestureRecognizer(new brls::TapGestureRecognizer(tile));
     return tile;
+}
+
+void GameListTab::loadTileImages(std::vector<std::pair<brls::Image*, size_t>> pending, size_t from, int gen) {
+    if (gen != *tileGen) return;  // la cuadricula se rehizo: estas imagenes ya no existen
+    const size_t hasta = std::min(pending.size(), from + 6);
+    for (size_t i = from; i < hasta; ++i) {
+        const auto& icon = this->shown[pending[i].second].icon;
+        pending[i].first->setImageFromMem(icon.data(), icon.size());
+    }
+    if (hasta >= pending.size()) return;
+    std::weak_ptr<int> vivo = tileGen;
+    brls::sync([this, pending = std::move(pending), hasta, gen, vivo]() mutable {
+        if (vivo.expired()) return;
+        this->loadTileImages(std::move(pending), hasta, gen);
+    });
 }
 
 void GameListTab::openSearch() {

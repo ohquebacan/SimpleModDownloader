@@ -158,16 +158,22 @@ namespace utils {
             f << nuevo.dump();
         }
 
-        // OQB: cuando se jugo cada uno por ultima vez (para ordenar por recientes).
-        if (R_SUCCEEDED(pdmqryInitialize())) {
-            for (auto& g : games) {
-                const u64 id = std::stoull(g.tid, nullptr, 16);
-                PdmLastPlayTime last{};
-                s32 total = 0;
-                if (R_SUCCEEDED(pdmqryQueryLastPlayTime(false, &last, &id, 1, &total)) && total > 0 && last.flag) {
-                    g.lastPlayed = last.timestamp_user;
-                    g.minutesAgo = last.last_played_minutes;
-                    g.playedKnown = true;
+        // Cuando se jugo cada uno por ultima vez, en una sola consulta (antes una por juego).
+        if (!games.empty() && R_SUCCEEDED(pdmqryInitialize())) {
+            std::vector<u64> ids;
+            for (auto& g : games) ids.push_back(std::stoull(g.tid, nullptr, 16));
+            std::vector<PdmLastPlayTime> last(ids.size());
+            s32 total = 0;
+            if (R_SUCCEEDED(pdmqryQueryLastPlayTime(false, last.data(), ids.data(), ids.size(), &total))) {
+                for (s32 k = 0; k < total; ++k) {
+                    if (!last[k].flag) continue;
+                    for (auto& g : games) {
+                        if (std::stoull(g.tid, nullptr, 16) != last[k].application_id) continue;
+                        g.lastPlayed = last[k].timestamp_user;
+                        g.minutesAgo = last[k].last_played_minutes;
+                        g.playedKnown = true;
+                        break;
+                    }
                 }
             }
             pdmqryExit();

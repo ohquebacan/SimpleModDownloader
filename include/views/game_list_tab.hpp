@@ -2,6 +2,7 @@
 
 #include <borealis.hpp>
 #include <thread>
+#include <memory>
 #include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
@@ -49,6 +50,8 @@ private:
     BRLS_BIND(brls::Box, headChips, "head_chips_top");
     BRLS_BIND(brls::Box, hintBar, "hint_bar");
     std::vector<brls::Box*> sortChips;
+    std::shared_ptr<int> tileGen = std::make_shared<int>(0);
+    void loadTileImages(std::vector<std::pair<brls::Image*, size_t>> pending, size_t from, int gen);
     void openSearch();
     BRLS_BIND(brls::Box, grid, "grid");
     BRLS_BIND(brls::Box, loading_box, "loading_box");

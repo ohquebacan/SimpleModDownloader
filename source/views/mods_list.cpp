@@ -63,7 +63,7 @@ ModData::ModData(Game game): game(game)
 {
     //modList = new ModList(game);
     modList = std::make_unique<ModList>(game);
-    net::downloadImage(game.getBannerUrl(), bannerBuffer);
+    // OQB: la portada ya no se usa en la pagina del mod; no se descarga.
     brls::Logger::debug("{} mods found", modList->getMods().size());
 
 

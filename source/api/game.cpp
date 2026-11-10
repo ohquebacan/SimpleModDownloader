@@ -4,15 +4,52 @@
 #include <curl/curl.h>
 
 #include <regex>
+#include <ctime>
+#include <fstream>
+
+/* OQB: lo que GameBanana dice de cada juego (su id, nombre, portada y
+   categorias) se guarda por TitleID una semana. Asi abrir un juego ya visto no
+   hace dos consultas antes de pedir la lista de mods. */
+static const char* GB_CACHE = "sdmc:/config/SimpleModDownloader/gamebanana.json";
+
+static nlohmann::json leerCacheGb() {
+    std::ifstream f(GB_CACHE);
+    if (!f) return nlohmann::json::object();
+    nlohmann::json j = nlohmann::json::parse(f, nullptr, false);
+    return j.is_object() ? j : nlohmann::json::object();
+}
 
 Game::Game(const std::string& m_title, const std::string& m_tid) {
     title = m_title;
     tid = m_tid;
+
+    const long ahora = static_cast<long>(std::time(nullptr));
+    nlohmann::json cache = leerCacheGb();
+    if (!tid.empty() && cache.contains(tid) && cache[tid].is_object()) {
+        const auto& c = cache[tid];
+        if (c.value("id", 0) > 0 && ahora - c.value("cuando", 0L) < 7 * 24 * 3600 && c.contains("categorias") && c["categorias"].is_array()) {
+            title = c.value("titulo", title);
+            gamebananaID = c.value("id", 0);
+            bannerURL = c.value("portada", "");
+            int index = 0;
+            for (const auto& cat : c["categorias"])
+                if (cat.is_array() && cat.size() == 2) categories.push_back(Category(cat[0].get<std::string>(), cat[1].get<int>(), index++));
+            return;
+        }
+    }
+
     searchGame();
     parseJson();
     if (gamebananaID > 0)
         loadCategories();
 
+    if (gamebananaID > 0 && !tid.empty()) {
+        nlohmann::json cats = nlohmann::json::array();
+        for (auto& c : categories) cats.push_back({c.getName(), c.getID()});
+        cache[tid] = {{"id", gamebananaID}, {"titulo", title}, {"portada", bannerURL}, {"categorias", cats}, {"cuando", ahora}};
+        std::ofstream f(GB_CACHE, std::ios::trunc);
+        f << cache.dump();
+    }
 }
 
 void Game::searchGame() {
