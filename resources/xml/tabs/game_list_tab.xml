@@ -27,16 +27,21 @@
         id="grid_scroll"
         width="auto"
         height="auto"
-        grow="1.0"
-        paddingTop="20"
-        paddingRight="30"
-        paddingBottom="20"
-        paddingLeft="30">
+        axis="column"
+        alignItems="stretch"
+        scrollingBehavior="centered"
+        grow="1.0">
+
         <brls:Box
             id="grid"
             width="auto"
             height="auto"
-            axis="column"/>
+            axis="column"
+            paddingTop="20"
+            paddingRight="30"
+            paddingBottom="20"
+            paddingLeft="30"/>
+
     </brls:ScrollingFrame>
 
 </brls:Box>
