@@ -96,8 +96,10 @@ namespace utils {
             if (R_FAILED(rc))
                 continue;
 
-            // Skip system apps, media apps and NRO forwarders — games always require a user account
-            if (controlData->nacp.startup_user_account == 0)
+            /* OQB: antes se saltaban los que no piden usuario al abrir, pero hay
+               juegos que no lo piden (Saints Row, por ejemplo) y no salian. Ahora
+               solo se saltan los forwarders de homebrew: sus ids no empiezan con 01. */
+            if ((tid >> 56) != 0x01)
                 continue;
 
             decompressNacpNames(&controlData->nacp);
