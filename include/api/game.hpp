@@ -40,6 +40,7 @@ class Game {
         std::string bannerURL;
         int gamebananaID = 0;
         std::string tid;
+        bool strictFallback = false;
         std::vector<Category> categories;
         brls::Image* icon;
 };

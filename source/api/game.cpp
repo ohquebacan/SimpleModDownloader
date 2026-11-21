@@ -72,6 +72,25 @@ void Game::searchGame() {
     }
     
     
+    // OQB: la búsqueda estricta pide el nombre exacto; si no da nada, se
+    // prueba la normal (por ejemplo, nombres con «Edition» o subtítulos).
+    if (config.getStrictSearch()) {
+        bool vacio = json.empty();
+        if (!vacio) {
+            try { vacio = json.at("_aMetadata").at("_nRecordCount").get<int>() == 0; } catch (...) { vacio = true; }
+        }
+        if (vacio) {
+            try {
+                json = net::downloadRequest(fmt::format(
+                    "https://gamebanana.com/apiv11/Util/Search/Results?_sModelName=Game&_sOrder=best_match&_sSearchString={}%20%28Switch%29",
+                    title_url));
+                strictFallback = true;
+            } catch (const std::exception& e) {
+                brls::Logger::error("Fallback search failed: " + title + " - " + e.what());
+            }
+        }
+    }
+
     if(json.empty()) {
         brls::Logger::error("Failed to search for game: " + title);
     }
@@ -84,7 +103,7 @@ void Game::parseJson() {
 
     int pos = 0;
     cfg::Config config;
-    if(config.getStrictSearch()) {
+    if(config.getStrictSearch() && !strictFallback) {
         const auto& records = json.at("_aRecords");
         for (size_t i = 0; i < records.size(); ++i) {
             std::string sName = records[i].at("_sName").get<std::string>();
