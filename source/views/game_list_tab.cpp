@@ -8,6 +8,10 @@
 #include <borealis.hpp>
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <ctime>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 using namespace brls::literals;
 
@@ -72,6 +76,45 @@ brls::RecyclerCell* GameData::cellForRow(brls::RecyclerFrame* recycler, brls::In
     if (!game.icon.empty())
         cell->image->setImageFromMem(game.icon.data(), game.icon.size());
     return cell;
+}
+
+// OQB: Bacán Shop deja aquí el juego que abrir («Mods» en su ficha) y luego
+// pasa el control a esta app. Se lee una sola vez y se borra.
+static constexpr const char* kPedidoBacan = "sdmc:/config/SimpleModDownloader/abrir-juego.json";
+
+static bool leerPedidoBacan(std::string& tid, std::string& nombre) {
+    std::ifstream f(kPedidoBacan);
+    if (!f) return false;
+    nlohmann::json j = nlohmann::json::parse(f, nullptr, false);
+    f.close();
+    std::remove(kPedidoBacan);
+    if (!j.is_object()) return false;
+    // Un pedido viejo (la app no se abrió en su momento) no se atiende.
+    const long cuando = j.value("cuando", 0L);
+    if (cuando <= 0 || std::time(nullptr) - cuando > 15 * 60) return false;
+    tid = j.value("tid", "");
+    nombre = j.value("nombre", "");
+    for (auto& c : tid) c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    return tid.size() == 16;
+}
+
+void GameListTab::abrirPedidoBacan() {
+    std::string tid, nombre;
+    if (!leerPedidoBacan(tid, nombre)) return;
+    brls::Logger::info("Pedido de Bacan Shop: abrir {} ({})", nombre, tid);
+    utils::GameInfo info;
+    bool hallado = false;
+    for (const auto& g : s_cachedGames) {
+        std::string t = g.tid;
+        for (auto& c : t) c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+        if (t == tid) { info = g; hallado = true; break; }
+    }
+    if (!hallado) {
+        if (nombre.empty()) return;
+        info.name = nombre;
+        info.tid = tid;
+    }
+    brls::sync([this, info]() { openGame(this, info); });
 }
 
 void GameData::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
@@ -164,6 +207,7 @@ GameListTab::GameListTab() {
     if (s_cacheLoaded) {
         loading_box->setVisibility(brls::Visibility::GONE);
         this->applyView();
+        this->abrirPedidoBacan();
         return;
     }
 
@@ -185,6 +229,7 @@ GameListTab::GameListTab() {
             loading_spinner->animate(false);
             loading_box->setVisibility(brls::Visibility::GONE);
             this->applyView();
+            this->abrirPedidoBacan();
         });
     });
 

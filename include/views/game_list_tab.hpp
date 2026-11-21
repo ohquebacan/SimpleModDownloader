@@ -53,6 +53,7 @@ private:
     std::shared_ptr<int> tileGen = std::make_shared<int>(0);
     void loadTileImages(std::vector<std::pair<brls::Image*, size_t>> pending, size_t from, int gen);
     void openSearch();
+    void abrirPedidoBacan();
     BRLS_BIND(brls::Box, grid, "grid");
     BRLS_BIND(brls::Box, loading_box, "loading_box");
     BRLS_BIND(brls::Label, loading_label, "loading_label");
