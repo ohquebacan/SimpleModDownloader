@@ -1,6 +1,7 @@
 #include <cctype>
 #include "api/extract.hpp"
 #include "utils/progress_event.hpp"
+#include "utils/OqbPchtxt.h"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -73,6 +74,60 @@ namespace extract {
         return std::string::npos;
     }
 
+    /* OQB: parches de texto de IPSwitch (.pchtxt). Atmosphere solo lee .ips, asi
+       que se convierten al instalar. Muchos mods de 60 fps y resolucion vienen asi. */
+    static bool esPchtxt(const std::string& path) {
+        if (path.size() < 7) return false;
+        std::string fin = path.substr(path.size() - 7);
+        for (auto& c : fin) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        return fin == ".pchtxt";
+    }
+
+    // Nombre de carpeta seguro para exefs_patches/<nombre>/.
+    static std::string carpetaSegura(std::string nombre) {
+        for (auto& c : nombre)
+            if (!std::isalnum(static_cast<unsigned char>(c)) && c != ' ' && c != '-' && c != '_') c = '_';
+        while (!nombre.empty() && nombre.back() == ' ') nombre.pop_back();
+        return nombre.empty() ? std::string("mod") : nombre;
+    }
+
+    /* Convierte un .pchtxt del archivo y deja los .ips en
+       <outputDir>/exefs_patches/<carpeta>/<BUILDID>.ips. Si viene dentro de
+       exefs_patches/<X>/, se respeta X; si no, la carpeta es el nombre del mod. */
+    static void convertirPchtxt(struct archive* archive, const std::string& entryName, const std::string& outputDir) {
+        std::string texto;
+        char buffer[16384];
+        ssize_t leidos;
+        while ((leidos = archive_read_data(archive, buffer, sizeof(buffer))) > 0) {
+            texto.append(buffer, static_cast<size_t>(leidos));
+            if (texto.size() > 8 * 1024 * 1024) break;  // un .pchtxt real pesa unos KB
+        }
+        std::string carpeta;
+        std::string low = entryName;
+        for (auto& c : low) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        const size_t ep = low.find("exefs_patches/");
+        if (ep != std::string::npos) {
+            const size_t ini = ep + 14, fin = entryName.find('/', ini);
+            if (fin != std::string::npos) carpeta = entryName.substr(ini, fin - ini);
+        }
+        if (carpeta.empty()) carpeta = std::filesystem::path(outputDir).filename().string();
+        carpeta = carpetaSegura(carpeta);
+
+        std::vector<oqb::pchtxt::Ips> parches;
+        std::string error;
+        if (!oqb::pchtxt::Convertir(texto, parches, error)) {
+            brls::Logger::error("No se pudo convertir {}: {}", entryName, error);
+            return;
+        }
+        for (const auto& ips : parches) {
+            const std::string destino = fmt::format("{}/exefs_patches/{}/{}", outputDir, carpeta, oqb::pchtxt::NombreIps(ips));
+            std::filesystem::create_directories(std::filesystem::path(destino).parent_path());
+            std::ofstream f(destino, std::ios::binary | std::ios::trunc);
+            f.write(reinterpret_cast<const char*>(ips.data.data()), static_cast<std::streamsize>(ips.data.size()));
+            brls::Logger::info("{} -> {} ({} parches)", entryName, destino, ips.parches);
+        }
+    }
+
     bool hasSupportedContents(const std::string& archivePath, const std::string& tid) {
         /* Los mods de Smash van tal cual a sdmc:/ultimate/mods, no se filtran. */
         if (tid == smash_tid)
@@ -96,7 +151,7 @@ namespace extract {
         while (archive_read_next_header(archive, &entry) == ARCHIVE_OK) {
             const std::string name = archive_entry_pathname(entry);
             std::string folder;
-            if (findModFolder(name, folder) != std::string::npos) {
+            if (esPchtxt(name) || findModFolder(name, folder) != std::string::npos) {
                 brls::Logger::debug("Contenido instalable encontrado: {}", name);
                 supported = true;
                 break;
@@ -107,7 +162,7 @@ namespace extract {
         archive_read_free(archive);
 
         if (!supported)
-            brls::Logger::error("{} no trae romfs/, exefs/ ni exefs_patches/", archivePath);
+            brls::Logger::error("{} no trae romfs/, exefs/, exefs_patches/ ni .pchtxt", archivePath);
 
         return supported;
     }
@@ -156,6 +211,11 @@ bool extractEntry(const std::string& archiveFile, const std::string& outputDir, 
             if ((tid != smash_tid)) {
                 std::string folder;
                 const std::string entryStr = entryName;
+                if (esPchtxt(entryStr) && archive_entry_filetype(entry) != AE_IFDIR) {
+                    convertirPchtxt(archive, entryStr, outputDir);
+                    ProgressEvent::instance().incrementStep(1);
+                    continue;
+                }
                 const size_t at = findModFolder(entryStr, folder);
                 if (at != std::string::npos) {
 
