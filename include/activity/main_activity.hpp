@@ -11,3 +11,10 @@ class MoreActivity : public brls::Activity {
 public:
     CONTENT_FROM_XML_RES("activity/more.xml")
 };
+
+// OQB: «Acerca de» solo (imagen y texto), desde el panel de ajustes.
+class AboutActivity : public brls::Activity {
+public:
+    CONTENT_FROM_XML_RES("activity/about.xml")
+    void onContentAvailable() override;
+};

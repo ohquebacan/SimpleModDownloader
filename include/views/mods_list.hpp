@@ -64,15 +64,15 @@ public:
     ~ModListTab() override;
 
 private:
-    // OQB: cuadricula de mods con categorias arriba (antes una lista)
-    BRLS_BIND(brls::Box, chips, "mod_chips");
-    BRLS_BIND(brls::Label, headTitle, "mhead_title");
-    BRLS_BIND(brls::Box, headSearchBox, "mhead_search_box");
-    BRLS_BIND(brls::Label, headSearch, "mhead_search_label");
-    BRLS_BIND(brls::Box, headChips, "mhead_chips_top");
+    // OQB: tarjetas en dos columnas; arriba el orden (pildora), el juego y la hora
+    BRLS_BIND(brls::Box, head, "mhead");
     BRLS_BIND(brls::Box, hintBar, "mod_hint_bar");
-    std::vector<brls::Box*> catChips;
+    brls::Box* gameInfo = nullptr;     // etiquetas del juego: categoria, pagina, busqueda
+    brls::Label* counter = nullptr;    // "3 / 20" en la barra de abajo
     std::vector<brls::Box*> sortChips;
+    std::vector<brls::Label*> sortLabels;
+    void buildHead();
+    void setSort(int sort);
     void doSearch();
     std::string lastSearch;
     int page = 1;
@@ -85,7 +85,6 @@ private:
     std::shared_ptr<std::atomic<bool>> alive;
     std::thread thumbs;
 
-    void buildChips();
     void buildGrid(bool focus);
     void stopThumbs();
 };

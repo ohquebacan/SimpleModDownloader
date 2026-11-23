@@ -1,0 +1,71 @@
+<brls:AppletFrame
+    id="applet"
+    iconInterpolation="linear"
+    headerHidden="true"
+    footerHidden="true">
+
+    <!-- OQB: solo «Acerca de» (antes iba en pestañas con Instalación y Ajustes,
+         que ahora estan en el panel de ajustes) -->
+    <brls:Box
+        id="about_root"
+        width="auto"
+        height="auto"
+        axis="column">
+
+        <brls:Box
+            width="auto"
+            height="auto"
+            axis="column"
+            grow="1.0"
+            paddingTop="40"
+            paddingLeft="140"
+            paddingRight="140">
+
+            <brls:Label
+                width="auto"
+                height="auto"
+                fontSize="35"
+                horizontalAlign="center"
+                text="@i18n/menu/main/app_name"/>
+
+            <brls:Image
+                width="auto"
+                height="33%"
+                image="@res/icon/about.jpg"
+                cornerRadius="15"
+                marginTop="28"
+                marginBottom="28"/>
+
+            <brls:Label
+                fontSize="15"
+                width="auto"
+                height="auto"
+                singleLine="false"
+                text="@i18n/menu/about/description"
+                horizontalAlign="center"/>
+
+            <brls:Label
+                width="auto"
+                height="auto"
+                fontSize="12"
+                singleLine="false"
+                marginTop="28"
+                text="@i18n/menu/about/thanks"/>
+
+            <brls:Label
+                width="auto"
+                height="auto"
+                fontSize="12"
+                marginTop="6"
+                text="@i18n/menu/about/translator"
+                singleLine="false"/>
+        </brls:Box>
+
+        <brls:Box
+            id="about_hint"
+            width="auto"
+            height="74"
+            axis="row"/>
+    </brls:Box>
+
+</brls:AppletFrame>

@@ -21,6 +21,17 @@ namespace utils {
     std::string modFolderFor(const std::string& gameName);
 
     std::vector<GameInfo> getInstalledGames();
+
+    // OQB: la version instalada de un juego ("3.0.3"), segun su NACP; vacia si no se sabe.
+    std::string installedVersion(const std::string& tid);
+    /* OQB: versiones de juego que menciona un texto: numeros de tres partes
+       (3.0.3) o de dos si van tras "version", "ver", "update", "v" (v1.2).
+       Sin repetir, en el orden en que aparecen, como mucho 4. */
+    std::vector<std::string> mentionedVersions(const std::string& text);
+    /* OQB: si un nombre de archivo nombra esta version: "4.0.1", "4_0_1",
+       "4-0-1" o "401" (sin puntos, como chainchomp401.rar), suelto entre
+       caracteres que no son digitos. */
+    bool nameMatchesVersion(const std::string& name, const std::string& version);
     std::string removeHtmlTags(const std::string& str);
     std::string getModInstallPath();
     std::string timestamp_to_date(time_t timestamp);

@@ -31,8 +31,8 @@
     },
     "about": {
         "title": "About SimpleModDownloader",
-        "description": "SimpleModDownloader is an application that allows you to download and install mods for Nintendo Switch games created by PoloNX.",
-        "thanks": "◆ OQB version by OH! QUÉ BACÁN\n◆ Thanks to @nadrino for SimpleModManager\n◆ Thanks to Natinusala, xfangfang and XITRIX for borealis\n◆ Thanks to Pikatsuto for the logo and SuperButterScotch for the typography\n◆ Thanks to NicholeMattera for Simple-INI-Parser",
+        "description": "SimpleModDownloader is an application that allows you to download and install mods for Nintendo Switch games. Created by PoloNX and improved by OH! QUÉ BACÁN.",
+        "thanks": "◆ Thanks to @nadrino for SimpleModManager\n◆ Thanks to Natinusala, xfangfang and XITRIX for borealis\n◆ Thanks to Pikatsuto for the logo and SuperButterScotch for the typography\n◆ Thanks to NicholeMattera for Simple-INI-Parser",
         "translator": "◆ Thanks to traductors",
         "_MESSAGE_TO_TRANSLATORS": "Put your name in about/translator please"
     },
@@ -78,7 +78,11 @@
     "settings_tab": {
         "language": "Select language",
         "debug": "Debug layer",
-        "strict": "Strict search when looking up games (no false positives)"
+        "strict": "Strict search when looking up games (no false positives)",
+        "theme": "Theme",
+        "theme_restart": "The colors change when the app opens again.",
+        "theme_reopen": "Reopen now",
+        "theme_later": "Later"
     },
     "crash": {
         "sd_full": "The SD card is full. Please free up space and restart the application."
@@ -133,6 +137,51 @@
         "dl_step1": "1. Download",
         "dl_step2": "2. Install",
         "dl_note": "When it finishes you go back to the mod page. Then turn it on in SimpleModManager (+).",
-        "dl_done": "Mod installed. Turn it on in SimpleModManager."
+        "dl_done": "Mod installed. Turn it on in SimpleModManager.",
+        "title": "YOUR GAMES",
+        "played_short_today": "today",
+        "played_short_yesterday": "yesterday",
+        "played_short_days": "{} d ago",
+        "played_short_months": "{} mo ago",
+        "sort_label": "Sort: {}",
+        "search_chip": "“{}” · {} of {}",
+        "page_chip": "page {}",
+        "by": "by {}",
+        "sheet": "DETAILS",
+        "downloaded": "Downloaded",
+        "redownload": "Download again",
+        "ver_match": "Made for your version ({})",
+        "ver_other": "You have {} · the mod mentions {}",
+        "ver_mentions": "The mod mentions version {}",
+        "ver_note": "It may work on other versions too; exefs patches usually need the exact one.",
+        "your_version": "Your version",
+        "ver_file": "There is a file for your version ({})",
+        "no_more_pages": "No more pages",
+        "sort_gb": "With mods on GameBanana",
+        "gb_checking": "Checking GameBanana {} of {}",
+        "gb_checking_empty": "Checking which games have mods on GameBanana…",
+        "gb_none": "No game has mods on GameBanana.",
+        "gb_summary": "{} of {} games have mods on GameBanana",
+        "gb_hold": "hold X to refresh",
+        "gb_refresh": "Checking GameBanana again",
+        "gb_already": "GameBanana is already being checked"
+    },
+    "panel": {
+        "title": "SETTINGS",
+        "title_hint": "Settings",
+        "auto": "Automatic",
+        "language": "Language",
+        "language_help": "The app language. “Automatic” uses the console language. Applies when the app opens again.",
+        "language_later": "The language changes when the app opens again",
+        "strict": "Strict search",
+        "strict_help": "When looking up a game on GameBanana, only exact name matches are accepted. Avoids mods from a similarly named game; if a game is missing, try turning it off.",
+        "on": "On",
+        "off": "Off",
+        "smm_help": "Downloaded mods are turned on in SimpleModManager. This opens it (the store closes).",
+        "more": "About",
+        "more_help": "The app version, credits and thanks.",
+        "theme_help": "The app colors; the same as SimpleModManager and our other apps. Left and right change them right away.",
+        "change": "Change",
+        "close": "Close"
     }
 }

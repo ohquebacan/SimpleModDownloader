@@ -3,103 +3,166 @@
     height="auto"
     axis="column">
 
+    <!-- OQB: arriba "FICHA" y el juego en una pildora, y la hora; se arma en el codigo -->
     <brls:Box
+        id="pv_head"
         width="auto"
-        height="auto"
+        height="96"
+        paddingBottom="16"
         axis="row"
         alignItems="center"
-        paddingTop="26"
-        paddingBottom="14"
-        paddingLeft="40"
-        paddingRight="40">
+        paddingTop="24"
+        paddingLeft="32"
+        paddingRight="32"/>
 
-        <brls:Label
-            id="mod_preview_title"
-            width="auto"
-            height="auto"
-            fontSize="30"
-            singleLine="true"/>
-
-        <brls:Label
-            id="author"
-            width="auto"
-            height="auto"
-            fontSize="18"
-            marginLeft="16"
-            singleLine="true"/>
-
-        <brls:Box
-            width="auto"
-            height="auto"
-            grow="1.0"/>
-
-        <brls:Label
-            id="installed_label"
-            width="auto"
-            height="auto"
-            fontSize="16"
-            singleLine="true"/>
-    </brls:Box>
-
-    <brls:Box
+    <!-- OQB: la pagina se desplaza entera. Arriba las imagenes y la tarjeta de
+         informacion (con su propio desplazamiento, del alto de las imagenes);
+         abajo los archivos a todo el ancho, para leer sus nombres completos. -->
+    <brls:ScrollingFrame
+        id="pv_page"
         width="auto"
         height="auto"
-        axis="row"
-        grow="1.0"
-        paddingLeft="40"
-        paddingRight="40"
-        paddingBottom="16">
+        axis="column"
+        alignItems="stretch"
+        scrollingBehavior="centered"
+        grow="1.0">
 
         <brls:Box
-            id="screenshots_box"
-            width="660"
-            height="auto"
-            axis="column">
-
-            <brls:Box
-                id="big_image_box"
-                width="auto"
-                height="auto"
-                marginBottom="10"/>
-        </brls:Box>
-
-        <brls:ScrollingFrame
-            id="mod_preview_scrolling"
             width="auto"
             height="auto"
             axis="column"
-            alignItems="stretch"
-            scrollingBehavior="centered"
-            grow="1.0">
+            paddingTop="4"
+            paddingLeft="32"
+            paddingRight="32"
+            paddingBottom="16">
 
             <brls:Box
                 width="auto"
-                height="auto"
-                axis="column"
-                paddingLeft="24">
+                height="420"
+                axis="row">
 
                 <brls:Box
-                    id="stats_box"
+                    id="screenshots_box"
+                    width="640"
+                    height="auto"
+                    axis="column">
+
+                    <brls:Box
+                        id="big_image_box"
+                        width="auto"
+                        height="auto"
+                        marginBottom="12"/>
+                </brls:Box>
+
+                <brls:Box
+                    id="pv_panel"
+                    width="auto"
+                    height="420"
+                    axis="column"
+                    grow="1.0"
+                    marginLeft="24">
+
+                    <brls:ScrollingFrame
+                        id="mod_preview_scrolling"
+                        width="auto"
+                        height="auto"
+                        axis="column"
+                        alignItems="stretch"
+                        scrollingBehavior="centered"
+                        grow="1.0">
+
+                        <brls:Box
+                            width="auto"
+                            height="auto"
+                            axis="column"
+                            paddingTop="22"
+                            paddingLeft="24"
+                            paddingRight="24"
+                            paddingBottom="22">
+
+                            <brls:Label
+                                id="mod_preview_title"
+                                width="auto"
+                                height="auto"
+                                fontSize="26"
+                                singleLine="false"/>
+
+                            <brls:Label
+                                id="author"
+                                width="auto"
+                                height="auto"
+                                fontSize="16"
+                                marginTop="6"
+                                singleLine="true"/>
+
+                            <brls:Box
+                                id="stats_box"
+                                width="auto"
+                                height="auto"
+                                axis="row"
+                                marginTop="14"/>
+
+                            <brls:Box
+                                id="version_box"
+                                width="auto"
+                                height="auto"
+                                axis="column"/>
+
+                            <brls:Label
+                                id="installed_label"
+                                width="auto"
+                                height="auto"
+                                fontSize="15"
+                                marginTop="8"
+                                singleLine="true"/>
+
+                            <brls:Label
+                                id="description"
+                                width="auto"
+                                height="auto"
+                                fontSize="16"
+                                lineHeight="1.45"
+                                singleLine="false"
+                                marginTop="16"/>
+                        </brls:Box>
+                    </brls:ScrollingFrame>
+                </brls:Box>
+            </brls:Box>
+
+            <!-- Archivos, a todo el ancho -->
+            <brls:Box
+                id="pv_files"
+                width="auto"
+                height="auto"
+                axis="column"
+                marginTop="16"
+                paddingTop="18"
+                paddingLeft="22"
+                paddingRight="22"
+                paddingBottom="16">
+
+                <brls:Box
+                    id="files_head"
                     width="auto"
                     height="auto"
                     axis="row"
-                    marginBottom="14"/>
+                    alignItems="center"
+                    marginBottom="12">
 
-                <brls:Label
-                    id="description"
-                    width="auto"
-                    height="auto"
-                    fontSize="16"
-                    singleLine="false"
-                    marginBottom="16"/>
+                    <brls:Rectangle
+                        id="files_bar"
+                        width="4"
+                        height="20"
+                        color="#c0a8ee"
+                        marginRight="10"/>
 
-                <brls:Label
-                    id="files_title"
-                    width="auto"
-                    height="auto"
-                    fontSize="15"
-                    singleLine="true"
-                    marginBottom="6"/>
+                    <brls:Label
+                        id="files_title"
+                        width="auto"
+                        height="auto"
+                        fontSize="18"
+                        singleLine="true"/>
+                </brls:Box>
 
                 <brls:Box
                     id="files_box"
@@ -113,20 +176,15 @@
                     height="auto"
                     fontSize="14"
                     singleLine="false"
-                    marginTop="10"/>
+                    marginTop="6"/>
             </brls:Box>
-        </brls:ScrollingFrame>
-    </brls:Box>
+        </brls:Box>
+    </brls:ScrollingFrame>
 
     <brls:Box
         id="prev_hint_bar"
         width="auto"
-        height="auto"
-        axis="row"
-        alignItems="center"
-        paddingTop="12"
-        paddingBottom="16"
-        paddingLeft="40"
-        paddingRight="40"/>
+        height="74"
+        axis="row"/>
 
 </brls:Box>

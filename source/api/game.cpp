@@ -6,17 +6,79 @@
 #include <regex>
 #include <ctime>
 #include <fstream>
+#include <mutex>
+#include <algorithm>
+#include <cctype>
 
 /* OQB: lo que GameBanana dice de cada juego (su id, nombre, portada y
    categorias) se guarda por TitleID una semana. Asi abrir un juego ya visto no
    hace dos consultas antes de pedir la lista de mods. */
 static const char* GB_CACHE = "sdmc:/config/SimpleModDownloader/gamebanana.json";
 
+/* La revisión en segundo plano (filtro «Con página») y la pantalla pueden
+   leer y escribir la caché a la vez: un candado para las dos cosas. */
+static std::mutex gbMutex;
+
 static nlohmann::json leerCacheGb() {
+    std::lock_guard<std::mutex> lock(gbMutex);
     std::ifstream f(GB_CACHE);
     if (!f) return nlohmann::json::object();
     nlohmann::json j = nlohmann::json::parse(f, nullptr, false);
     return j.is_object() ? j : nlohmann::json::object();
+}
+
+// Guarda (o reemplaza) lo de un juego, releyendo la caché bajo el candado.
+static void guardarEnCacheGb(const std::string& tid, const nlohmann::json& dato) {
+    std::lock_guard<std::mutex> lock(gbMutex);
+    nlohmann::json cache = nlohmann::json::object();
+    {
+        std::ifstream f(GB_CACHE);
+        if (f) {
+            cache = nlohmann::json::parse(f, nullptr, false);
+            if (!cache.is_object()) cache = nlohmann::json::object();
+        }
+    }
+    cache[tid] = dato;
+    std::ofstream f(GB_CACHE, std::ios::trunc);
+    f << cache.dump();
+}
+
+int Game::estadoGameBanana(const std::string& tid) {
+    const nlohmann::json cache = leerCacheGb();
+    if (!cache.contains(tid) || !cache[tid].is_object()) return -1;
+    const auto& c = cache[tid];
+    const long ahora = static_cast<long>(std::time(nullptr));
+    if (c.value("v", 0) != 2 || ahora - c.value("cuando", 0L) >= 7 * 24 * 3600) return -1;
+    if (c.value("id", 0) > 0 && !c.contains("mods")) return -1;
+    return (c.value("id", 0) > 0 && c.value("mods", 0) > 0) ? 1 : 0;
+}
+
+void Game::olvidarGameBanana(const std::vector<std::string>& tids) {
+    std::lock_guard<std::mutex> lock(gbMutex);
+    nlohmann::json cache = nlohmann::json::object();
+    {
+        std::ifstream f(GB_CACHE);
+        if (f) {
+            cache = nlohmann::json::parse(f, nullptr, false);
+            if (!cache.is_object()) cache = nlohmann::json::object();
+        }
+    }
+    for (const auto& t : tids) cache.erase(t);
+    std::ofstream f(GB_CACHE, std::ios::trunc);
+    f << cache.dump();
+}
+
+std::map<std::string, int> Game::estadosGameBanana() {
+    const nlohmann::json cache = leerCacheGb();
+    const long ahora = static_cast<long>(std::time(nullptr));
+    std::map<std::string, int> out;
+    for (auto it = cache.begin(); it != cache.end(); ++it) {
+        const auto& c = it.value();
+        if (!c.is_object() || c.value("v", 0) != 2 || ahora - c.value("cuando", 0L) >= 7 * 24 * 3600) continue;
+        if (c.value("id", 0) > 0 && !c.contains("mods")) continue;  // guardado antes de contar mods: se revisa
+        out[it.key()] = (c.value("id", 0) > 0 && c.value("mods", 0) > 0) ? 1 : 0;
+    }
+    return out;
 }
 
 Game::Game(const std::string& m_title, const std::string& m_tid) {
@@ -27,13 +89,19 @@ Game::Game(const std::string& m_title, const std::string& m_tid) {
     nlohmann::json cache = leerCacheGb();
     if (!tid.empty() && cache.contains(tid) && cache[tid].is_object()) {
         const auto& c = cache[tid];
-        if (c.value("id", 0) > 0 && ahora - c.value("cuando", 0L) < 7 * 24 * 3600 && c.contains("categorias") && c["categorias"].is_array()) {
+        if (c.value("v", 0) == 2 && c.value("id", 0) > 0 && c.contains("mods") && ahora - c.value("cuando", 0L) < 7 * 24 * 3600 && c.contains("categorias") && c["categorias"].is_array()) {
+            modCount = c.value("mods", 0);
             title = c.value("titulo", title);
             gamebananaID = c.value("id", 0);
             bannerURL = c.value("portada", "");
             int index = 0;
             for (const auto& cat : c["categorias"])
                 if (cat.is_array() && cat.size() == 2) categories.push_back(Category(cat[0].get<std::string>(), cat[1].get<int>(), index++));
+            return;
+        }
+        // Ya se sabe que no tiene pagina (se revisa otra vez a la semana).
+        if (c.value("v", 0) == 2 && c.value("id", -1) == 0 && ahora - c.value("cuando", 0L) < 7 * 24 * 3600) {
+            gamebananaID = 0;
             return;
         }
     }
@@ -46,9 +114,11 @@ Game::Game(const std::string& m_title, const std::string& m_tid) {
     if (gamebananaID > 0 && !tid.empty()) {
         nlohmann::json cats = nlohmann::json::array();
         for (auto& c : categories) cats.push_back({c.getName(), c.getID()});
-        cache[tid] = {{"id", gamebananaID}, {"titulo", title}, {"portada", bannerURL}, {"categorias", cats}, {"cuando", ahora}};
-        std::ofstream f(GB_CACHE, std::ios::trunc);
-        f << cache.dump();
+        guardarEnCacheGb(tid, {{"v", 2}, {"id", gamebananaID}, {"titulo", title}, {"portada", bannerURL}, {"categorias", cats}, {"mods", modCount}, {"cuando", ahora}});
+    }
+    // La busqueda contesto y ningun resultado coincide: se recuerda que no tiene pagina.
+    else if (gamebananaID == 0 && !tid.empty() && !json.empty()) {
+        guardarEnCacheGb(tid, {{"v", 2}, {"id", 0}, {"cuando", ahora}});
     }
 }
 
@@ -96,25 +166,62 @@ void Game::searchGame() {
     }
 }
 
-void Game::parseJson() {
-    if(json.empty() || json.at("_aMetadata").at("_nRecordCount").get<int>() == 0) {
-        return;
+/* OQB: el nombre normalizado para comparar: minusculas, sin signos ni
+   espacios, y sin "(Switch)", "Nintendo Switch" ni "Switch Edition" al final. */
+static std::string normalizar(const std::string& n) {
+    std::string out;
+    for (unsigned char c : n) {
+        if (std::isalnum(c)) out += static_cast<char>(std::tolower(c));
+        else if (c >= 0x80) out += static_cast<char>(c);  // letras con acento (UTF-8) quedan
     }
-
-    int pos = 0;
-    cfg::Config config;
-    if(config.getStrictSearch() && !strictFallback) {
-        const auto& records = json.at("_aRecords");
-        for (size_t i = 0; i < records.size(); ++i) {
-            std::string sName = records[i].at("_sName").get<std::string>();
-            if (sName.find("Switch") != std::string::npos) { // Disembiguation for multiplat titles
-                pos = i;
-                break;
-            }
+    for (const char* cola : {"nintendoswitchedition", "switchedition", "nintendoswitch", "switch"}) {
+        const std::string t(cola);
+        if (out.size() > t.size() + 2 && out.compare(out.size() - t.size(), t.size(), t) == 0) {
+            out.erase(out.size() - t.size());
+            break;
         }
     }
+    return out;
+}
 
-    const auto& record = json.at("_aRecords")[pos];
+/* OQB: antes se tomaba el primer resultado de la busqueda. Con juegos que no
+   tienen pagina en GameBanana (12 orbits, 51 Worldwide Games, A Good
+   Snowman...), el primero era la pagina general «Nintendo Switch» y todos
+   mostraban los mismos mods. Ahora el nombre tiene que coincidir: igual, o uno
+   contiene al otro y comparten al menos la mitad del largo (Saints Row: The
+   Third - The Full Package / Saints Row: The Third). Si ninguno coincide, el
+   juego queda sin pagina (la app avisa que no esta en GameBanana). */
+void Game::parseJson() {
+    if(json.empty() || !json.contains("_aRecords") || json.at("_aMetadata").at("_nRecordCount").get<int>() == 0) {
+        return;
+    }
+    const std::string buscado = normalizar(title);
+    if (buscado.empty()) return;
+
+    int mejor = -1;
+    double puntaje = 0;
+    const auto& records = json.at("_aRecords");
+    for (size_t i = 0; i < records.size(); ++i) {
+        const std::string nombre = records[i].value("_sName", "");
+        const std::string n = normalizar(nombre);
+        if (n.empty()) continue;
+        double p = 0;
+        if (n == buscado) p = 2.0;
+        else if (n.find(buscado) != std::string::npos || buscado.find(n) != std::string::npos) {
+            const double corto = std::min(n.size(), buscado.size()), largo = std::max(n.size(), buscado.size());
+            if (corto / largo >= 0.5) p = corto / largo;
+        }
+        // La pagina general de la consola nunca es la de un juego.
+        if (records[i].value("_idRow", 0) == 6384 && p < 2.0) p = 0;
+        // Ante dos iguales, la que dice Switch (juegos multiplataforma).
+        if (p > 0 && nombre.find("Switch") != std::string::npos) p += 0.01;
+        if (p > puntaje) { puntaje = p; mejor = int(i); }
+    }
+    if (mejor < 0) {
+        brls::Logger::info("GameBanana: ningun resultado coincide con {}", title);
+        return;
+    }
+    const auto& record = records[mejor];
     title = record.at("_sName").get<std::string>();
     gamebananaID = record.at("_idRow").get<int>();
 }
@@ -135,7 +242,10 @@ void Game::loadCategories() {
     }
 
     int index = 0;
+    modCount = 0;
     for(auto tag : json.at("_aModRootCategories")) {
+        // OQB: cuantos mods tiene la pagina (hay paginas de juegos sin ningun mod).
+        if (tag.contains("_nItemCount") && tag["_nItemCount"].is_number_integer()) modCount += tag["_nItemCount"].get<int>();
         categories.push_back(Category(tag.at("_sName").get<std::string>(), tag.at("_idRow").get<int>(), index));
         index++;
     }

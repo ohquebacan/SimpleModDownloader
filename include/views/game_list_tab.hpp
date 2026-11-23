@@ -3,6 +3,7 @@
 #include <borealis.hpp>
 #include <thread>
 #include <memory>
+#include <atomic>
 #include "utils/utils.hpp"
 
 class GameCell : public brls::RecyclerCell
@@ -39,17 +40,21 @@ class GameData : public brls::RecyclerDataSource
 class GameListTab : public brls::Box {
 public:
     GameListTab();
-    ~GameListTab() { if (isLoading) brls::Application::unblockInputs(); if (loadThread.joinable()) loadThread.join(); }
+    ~GameListTab() {
+        if (isLoading) brls::Application::unblockInputs();
+        if (loadThread.joinable()) loadThread.join();
+        checkStop = true;
+        if (checkThread.joinable()) checkThread.join();
+    }
 
     static brls::View* create();
+    void refrescarTema();
+    class PanelAjustes* panel = nullptr;  // ajustes (R), una capa encima
 private:
     BRLS_BIND(brls::ScrollingFrame, gridScroll, "grid_scroll");
-    BRLS_BIND(brls::Label, headTitle, "head_title");
-    BRLS_BIND(brls::Box, headSearchBox, "head_search_box");
-    BRLS_BIND(brls::Label, headSearch, "head_search_label");
-    BRLS_BIND(brls::Box, headChips, "head_chips_top");
+    BRLS_BIND(brls::Box, head, "head");
     BRLS_BIND(brls::Box, hintBar, "hint_bar");
-    std::vector<brls::Box*> sortChips;
+    brls::Box* headSearch = nullptr;  // pildora con la busqueda (se ve solo si hay una)
     std::shared_ptr<int> tileGen = std::make_shared<int>(0);
     void loadTileImages(std::vector<std::pair<brls::Image*, size_t>> pending, size_t from, int gen);
     void openSearch();
@@ -69,8 +74,21 @@ private:
     // OQB: buscador y orden
     std::string filter;
     std::vector<utils::GameInfo> shown;
-    int sortMode = 0;  // 0 recientes, 1 A-Z, 2 con mods
+    int sortMode = 0;  // 0 recientes, 1 A-Z, 2 con mods, 3 solo con pagina en GameBanana
+    /* Filtro «Con página»: los juegos que no se conocen se revisan en segundo
+       plano, uno cada 2 s, y el resultado queda una semana en la cache. */
+    std::thread checkThread;
+    std::atomic<bool> checkStop{false};
+    std::atomic<int> checkDone{0};
+    int checkTotal = 0;
+    bool checking = false;
+    void startCheck();
+    void agregarPortada(const std::string& tid);
+    void refrescarGameBanana();
+    bool xEsperando = false;  // X apretada: se mira a los 500 ms si sigue (mantener = actualizar)
+    void updateHead();
     void applyView(bool focus = false);
     void updateHints();
-    brls::View* makeTile(const utils::GameInfo& game);
+    brls::View* makeTile(const utils::GameInfo& game, size_t index, size_t total);
+    brls::Label* counter = nullptr;  // "3 / 38" en la barra de abajo
 };

@@ -10,6 +10,8 @@
 #include <borealis.hpp>
 #include <SimpleIniParser.hpp>
 #include <cstring>
+#include <algorithm>
+#include <memory>
 #include <zlib.h>
 
 
@@ -260,3 +262,64 @@ namespace utils {
         return os.str();
     }
 }
+
+namespace utils {
+
+std::string installedVersion(const std::string& tid) {
+    if (tid.size() != 16) return "";
+    auto control = std::make_unique<NsApplicationControlData>();
+    u64 size = 0;
+    if (R_FAILED(nsGetApplicationControlData(NsApplicationControlSource_Storage, std::stoull(tid, nullptr, 16), control.get(), sizeof(NsApplicationControlData), &size)))
+        return "";
+    std::string v(control->nacp.display_version, strnlen(control->nacp.display_version, sizeof(control->nacp.display_version)));
+    if (!v.empty() && (v[0] == 'v' || v[0] == 'V')) v.erase(0, 1);
+    return v;
+}
+
+std::vector<std::string> mentionedVersions(const std::string& text) {
+    static const std::regex tres(R"((?:^|[^\d.])v?(\d{1,2}\.\d{1,2}\.\d{1,3})(?![\d.]))", std::regex::icase);
+    static const std::regex dos(R"((?:version|ver\.?|update|v)\s*(\d{1,2}\.\d{1,2})(?![\d.]))", std::regex::icase);
+    std::vector<std::pair<size_t, std::string>> found;
+    for (const auto* re : {&tres, &dos})
+        for (auto it = std::sregex_iterator(text.begin(), text.end(), *re); it != std::sregex_iterator(); ++it)
+            found.emplace_back((*it).position(1), (*it)[1].str());
+    std::sort(found.begin(), found.end());
+    std::vector<std::string> out;
+    for (auto& [pos, v] : found) {
+        if (std::find(out.begin(), out.end(), v) != out.end()) continue;
+        out.push_back(v);
+        if (out.size() == 4) break;
+    }
+    return out;
+}
+
+bool nameMatchesVersion(const std::string& name, const std::string& version) {
+    if (version.empty()) return false;
+    std::vector<std::string> partes;
+    std::string p;
+    for (char c : version) {
+        if (c == '.') { partes.push_back(p); p.clear(); }
+        else if (std::isdigit(static_cast<unsigned char>(c))) p += c;
+        else return false;
+    }
+    partes.push_back(p);
+    if (partes.size() < 2) return false;
+    std::vector<std::string> formas;
+    for (const char* sep : {".", "_", "-", ""}) {
+        std::string f;
+        for (size_t i = 0; i < partes.size(); ++i) f += (i ? sep : "") + partes[i];
+        if (std::string(sep).empty() && f.size() < 3) continue;  // "12" seria demasiado comun
+        formas.push_back(f);
+    }
+    for (const auto& f : formas) {
+        for (size_t pos = name.find(f); pos != std::string::npos; pos = name.find(f, pos + 1)) {
+            const bool antes = pos == 0 || !std::isdigit(static_cast<unsigned char>(name[pos - 1]));
+            const size_t fin = pos + f.size();
+            const bool despues = fin >= name.size() || !std::isdigit(static_cast<unsigned char>(name[fin]));
+            if (antes && despues) return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace utils

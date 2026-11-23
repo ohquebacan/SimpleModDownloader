@@ -4,6 +4,7 @@
 #include "utils/progress_event.hpp"
 #include "utils/utils.hpp"
 #include "utils/config.hpp"
+#include "utils/descargas.hpp"
 
 #include <regex>
 #include <filesystem>
@@ -164,6 +165,7 @@ void DownloadView::updateProgress() {
         ASYNC_RELEASE
         /* OQB: leemos la bandera antes del dismiss(), que puede destruir la vista. */
         const bool unsupported = this->notSupported;
+        if (!unsupported) descargas::marcar(this->file.getFileID());  // OQB: para marcarlo en la ficha
         getAppletFrame()->setHeaderVisibility(brls::Visibility::GONE);
         getAppletFrame()->setActionAvailable(brls::ControllerButton::BUTTON_B, true);
         this->dismiss();

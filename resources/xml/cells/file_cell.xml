@@ -1,39 +1,66 @@
 <brls:Box
     width="auto"
     height="auto"
-    axis="column"
-    marginBottom="12">
+    axis="row"
+    alignItems="center"
+    cornerRadius="12"
+    backgroundColor="#141118"
+    borderColor="#2a2431"
+    borderThickness="1"
+    paddingTop="10"
+    paddingBottom="10"
+    paddingLeft="14"
+    paddingRight="14"
+    marginBottom="8">
 
-    <brls:Label
-        id="title"
-        width="auto"
-        height="auto"
-        fontSize="17"
-        singleLine="true"/>
+    <brls:Box
+        id="ext_box"
+        width="44"
+        height="44"
+        cornerRadius="10"
+        backgroundColor="#282234"
+        justifyContent="center"
+        alignItems="center"
+        marginRight="14"/>
 
     <brls:Box
         width="auto"
         height="auto"
-        axis="row"
-        alignItems="flexStart"
-        marginTop="4"
-        marginBottom="8">
-        <brls:Label
-            id="date"
-            width="auto"
-            height="auto"
-            fontSize="13"
-            marginRight="14"/>
+        axis="column"
+        grow="1.0"
+        shrink="1.0">
 
         <brls:Label
-            id="size"
+            id="title"
             width="auto"
             height="auto"
-            fontSize="13"/>
+            fontSize="17"
+            singleLine="true"/>
+
+        <brls:Box
+            width="auto"
+            height="auto"
+            axis="row"
+            marginTop="3">
+            <brls:Label
+                id="date"
+                width="auto"
+                height="auto"
+                fontSize="13"
+                marginRight="14"/>
+
+            <brls:Label
+                id="size"
+                width="auto"
+                height="auto"
+                fontSize="13"/>
+        </brls:Box>
     </brls:Box>
 
     <brls:Button
         height="auto"
-        width="auto"
+        width="220"
+        shrink="0"
+        marginLeft="12"
         id="download"/>
 </brls:Box>

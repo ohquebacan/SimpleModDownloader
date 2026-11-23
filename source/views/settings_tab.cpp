@@ -2,6 +2,8 @@
 #include "utils/config.hpp"
 
 #include <filesystem>
+#include <switch.h>
+#include "views/oqb_ui.hpp"
 
 using namespace brls::literals;
 
@@ -35,6 +37,20 @@ SettingsTab::SettingsTab() {
         cfg::Config config;
         config.setStringSearch(value);
     });
+
+    // OQB: tema de colores (las mismas gamas que nuestras otras apps), al instante.
+    {
+        std::vector<std::string> nombres;
+        for (const auto& t : oqb::kTemas) nombres.push_back(t.nombre);
+        auto* tema = new brls::SelectorCell();
+        tema->init("menu/settings_tab/theme"_i18n, nombres, oqb::temaActual(), [](int) {}, [](int elegido) {
+            // Al instante, como en el panel de ajustes.
+            oqb::usarPaleta(elegido);
+            oqb::guardarTema(elegido);
+            oqb::aplicarTemaBorealis();
+        });
+        settings_box->addView(tema);
+    }
 
     #ifndef NDEBUG
     auto debug_cell = new brls::BooleanCell();

@@ -19,6 +19,7 @@ class File {
         Game getGame() { return game; }
         std::string getModName() { return modName; }
         bool getRomfs() { return romfs; }
+        std::string getFileID() { return fileID; }
         /* OQB: true cuando la API de GameBanana no contesto y por tanto NO
          * sabemos si el mod trae romfs. No es lo mismo que "no compatible". */
         bool getCheckFailed() { return checkFailed; }
